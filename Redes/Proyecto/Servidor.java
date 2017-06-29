@@ -12,8 +12,8 @@ public class Servidor
     private InetAddress direccion;
     private InetAddress mascara; //todavía no estoy seguro de para qué vamos a usar la máscara...
     private byte[] numAS;
-    private static final int puertoEscucha = 57809;
-    private int puertoEnvia;
+    private static final int puertoEntrada = 57809;
+    private int puertoSalida;
     
     private ServerSocket server;
 
@@ -41,7 +41,7 @@ public class Servidor
         
         numAS = as;
         
-        server = new ServerSocket(puertoEscucha);
+        server = new ServerSocket(puertoEntrada);
     }
     
     
