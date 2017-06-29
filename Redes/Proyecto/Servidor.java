@@ -1,4 +1,5 @@
 import java.net.*;
+import java.io.IOException;
 
 /**
  * Write a description of class Servidor here.
@@ -14,12 +15,12 @@ public class Servidor
     private static final int puertoEscucha = 57809;
     private int puertoEnvia;
     
-    //private Socket s;
+    private ServerSocket server;
 
     /**
      * Constructor for objects of class Servidor
      */
-    public Servidor(String ip, String mask, byte[] as) throws IllegalArgumentException
+    public Servidor(String ip, String mask, byte[] as) throws IllegalArgumentException, IOException
     {
         try
         {
@@ -40,7 +41,8 @@ public class Servidor
         
         numAS = as;
         
-        //s = new Socket(ip.toString(), puertoEscucha);
+        server = new ServerSocket(puertoEscucha);
     }
+    
     
 }
