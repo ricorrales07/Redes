@@ -1,5 +1,0 @@
-#BlueJ class context
-comment0.params=ip\ mask\ as
-comment0.target=Servidor(DireccionIPv4,\ DireccionIPv4,\ byte[])
-comment0.text=\r\n\ Constructor\ for\ objects\ of\ class\ Servidor\r\n
-numComments=1
