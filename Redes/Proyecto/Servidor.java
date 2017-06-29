@@ -1,4 +1,4 @@
-import java.net;
+import java.net.*;
 
 /**
  * Write a description of class Servidor here.
@@ -8,28 +8,24 @@ import java.net;
  */
 public class Servidor
 {
-    private byte[] direccionIPv4;
-    private struct mascaraIPv4_t
-    {
-        int decimal;
-        byte[] bytes;
-    } mascaraIPv4;
+    private DireccionIPv4 direccion;
+    private DireccionIPv4 mascara;
     private byte[] numAS;
     private static final int puertoEscucha = 57809;
     private int puertoEnvia;
     
-    private Socket s;
+    //private Socket s;
 
     /**
      * Constructor for objects of class Servidor
      */
-    public Servidor(byte[] ip, int mask, byte[] as)
+    public Servidor(DireccionIPv4 ip, DireccionIPv4 mask, byte[] as)
     {
-        direccionIPv4 = ip;
-        mascaraIPv4.decimal = mask;
+        direccion = ip;
+        mascara = mask;
         numAS = as;
         
-        //s = new Socket("" + ip, );
+        //s = new Socket(ip.toString(), puertoEscucha);
     }
     
 }
