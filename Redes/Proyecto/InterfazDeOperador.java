@@ -5,7 +5,7 @@
  * @author (your name) 
  * @version (a version number or a date)
  */
-public class Interfaz
+public class InterfazDeOperador implements Runnable
 {
     // instance variables - replace the example below with your own
     private int x;
@@ -13,7 +13,7 @@ public class Interfaz
     /**
      * Constructor for objects of class Interfaz
      */
-    public Interfaz()
+    public InterfazDeOperador()
     {
         // initialise instance variables
         x = 0;
@@ -29,5 +29,9 @@ public class Interfaz
     {
         // put your code here
         return x + y;
+    }
+    
+    public void run()
+    {
     }
 }

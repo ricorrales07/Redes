@@ -58,6 +58,11 @@ public class TablaVecinos
         return tablaUnica;
     }
     
+    public void addVecino(InetAddress ipVecino, InetAddress mascaraVecino, byte[] asVecino)
+    {
+        addVecino(ipVecino, mascaraVecino, asVecino, true, InetAddress.getLoopbackAddress());
+    }
+    
     public void addVecino(InetAddress ipVecino, InetAddress mascaraVecino, byte[] asVecino, boolean manual, InetAddress origen)
     {
         Vecino vecinoNuevo = new Vecino(ipVecino, mascaraVecino, asVecino);
@@ -68,6 +73,11 @@ public class TablaVecinos
             registro.log(Level.INFO, "Nuevo vecino añadido a la tabla de vecinos (vía " + origen.getHostAddress() + "): {1}", vecinoNuevo);
     }
 
+    public void removeVecino(InetAddress ipVecino) throws IllegalArgumentException
+    {
+        removeVecino(ipVecino, true, InetAddress.getLoopbackAddress());
+    }
+    
     public void removeVecino(InetAddress ipVecino, boolean manual, InetAddress origen) throws IllegalArgumentException
     {
         try
