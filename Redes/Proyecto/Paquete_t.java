@@ -7,6 +7,7 @@
  */
 public enum Paquete_t
 {
+    NULO,
     SOLICITUD_DE_CONEXION,
     CONEXION_ACEPTADA,
     SOLICITUD_DE_DESCONEXION,

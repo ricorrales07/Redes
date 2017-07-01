@@ -1,4 +1,5 @@
 import java.io.InputStream;
+import java.net.Socket;
 
 /**
  * Write a description of interface ManejadorDePaquetes here.
@@ -8,5 +9,5 @@ import java.io.InputStream;
  */
 public interface ManejadorDePaquetes
 {
-    public void maneja(Paquete_t tipoDePaquete, InputStream input);
+    public void maneja(Paquete_t tipoDePaquete, Socket s, InputStream input);
 }

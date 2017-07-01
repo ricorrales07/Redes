@@ -40,6 +40,6 @@ public class DespachadorDePaquetes implements Runnable
         }
         
         ManejadorDePaquetes m = servicios.get(tipo);
-        m.maneja(tipo, i);
+        m.maneja(tipo, conexion, i);
     }
 }

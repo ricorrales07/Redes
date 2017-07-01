@@ -17,9 +17,9 @@ public class TablaVecinos
     {
         private InetAddress ip;
         private InetAddress mask;
-        private byte[] as;
+        private NumeroAS as;
         
-        public Vecino(InetAddress ipVecino, InetAddress mascaraVecino, byte[] asVecino)
+        public Vecino(InetAddress ipVecino, InetAddress mascaraVecino, NumeroAS asVecino)
         {
             ip = ipVecino;
             mask = mascaraVecino;
@@ -51,19 +51,24 @@ public class TablaVecinos
         tabla = new Hashtable<InetAddress, Vecino>();        
     }
     
-    public static TablaVecinos getTabla() throws IOException
+    public static synchronized TablaVecinos getTabla() throws IOException
     {
         if (tablaUnica == null)
             tablaUnica = new TablaVecinos();
         return tablaUnica;
     }
     
-    public void addVecino(InetAddress ipVecino, InetAddress mascaraVecino, byte[] asVecino)
+    public synchronized void addVecino(PaqueteVecino pv, boolean manual)
+    {
+        addVecino(pv.getIP(), pv.getMascara(), pv.getAS(), manual, pv.getIP());
+    }
+    
+    public synchronized void addVecino(InetAddress ipVecino, InetAddress mascaraVecino, NumeroAS asVecino)
     {
         addVecino(ipVecino, mascaraVecino, asVecino, true, InetAddress.getLoopbackAddress());
     }
     
-    public void addVecino(InetAddress ipVecino, InetAddress mascaraVecino, byte[] asVecino, boolean manual, InetAddress origen)
+    public synchronized void addVecino(InetAddress ipVecino, InetAddress mascaraVecino, NumeroAS asVecino, boolean manual, InetAddress origen)
     {
         Vecino vecinoNuevo = new Vecino(ipVecino, mascaraVecino, asVecino);
         tabla.put(ipVecino, vecinoNuevo);
@@ -73,12 +78,12 @@ public class TablaVecinos
             registro.log(Level.INFO, "Nuevo vecino añadido a la tabla de vecinos (vía " + origen.getHostAddress() + "): {1}", vecinoNuevo);
     }
 
-    public void removeVecino(InetAddress ipVecino) throws IllegalArgumentException
+    public synchronized void removeVecino(InetAddress ipVecino) throws IllegalArgumentException
     {
         removeVecino(ipVecino, true, InetAddress.getLoopbackAddress());
     }
     
-    public void removeVecino(InetAddress ipVecino, boolean manual, InetAddress origen) throws IllegalArgumentException
+    public synchronized void removeVecino(InetAddress ipVecino, boolean manual, InetAddress origen) throws IllegalArgumentException
     {
         try
         {
@@ -100,7 +105,7 @@ public class TablaVecinos
         }
     }
     
-    public boolean esVecino(InetAddress ip)
+    public synchronized boolean esVecino(InetAddress ip)
     {
         return tabla.containsKey(ip);
     }
