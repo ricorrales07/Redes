@@ -12,7 +12,7 @@ public class Destino
 {
     InetAddress ip;
     InetAddress mascara;
-	byte [] cantAS;
+    byte [] cantAS;
     
     public InetAddress getIP()
     {
@@ -23,7 +23,7 @@ public class Destino
     {
         return mascara;
     }
-	
+    
     public byte[] getCantAs()
     {
         return cantAS;

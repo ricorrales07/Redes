@@ -60,17 +60,17 @@ public class TablaAlcanzabilidad
         return tablaUnica;
     }
     
-    public synchronized void addPaquete(PaqueteAlcanzabilidad pa)
+    /*public synchronized void addPaquete(PaqueteAlcanzabilidad pa)
     {
         addPaquete(pa.getAS(),pa.getCantDest(), pa.getListaDestinos());
-    }
+    }*/
    
     
     public synchronized void addPaquete(InetAddress ipVecino,Paquete_t tipo,NumeroAS as, byte [] cantDestinos, Destino [] listaDestinos)
     {
         PaqueteAlcanzabilidad paqueteNuevo = new PaqueteAlcanzabilidad(tipo,as,cantDestinos,listaDestinos);
         tabla.put(ipVecino, paqueteNuevo);
-        registro.log(Level.INFO, "Nuevo paquete de alcanzabilidad añadido a la tabla de alcanzabilidad);
+        registro.log(Level.INFO, "Nuevo paquete de alcanzabilidad añadido a la tabla de alcanzabilidad");
     }
    
 }

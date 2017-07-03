@@ -10,7 +10,7 @@ import java.net.*;
  */
 public class PaqueteAlcanzabilidad
 {
-    Paquete_t tipo
+    Paquete_t tipo;
 	NumeroAS as;
 	byte [] cantDestinos;
 	Destino [] listaDestinos; 
@@ -20,8 +20,8 @@ public class PaqueteAlcanzabilidad
     {
         this.tipo = tipo;
         this.as = as;
-        this.cantDestinos = ip;
-        this.listaDestinos = mascara;
+        this.cantDestinos = cantDestinos;
+        this.listaDestinos = listaDestinos;
     }
     
     
@@ -35,13 +35,13 @@ public class PaqueteAlcanzabilidad
         return as;
     }
 	
-	public byte[] getCantDest()
-	{
-		return cantDestinos;
-	}	
+    public byte[] getCantDest()
+    {
+    	return cantDestinos;
+    }	
 	
-	public Destino[] listaDestinos()
-	{
-		return listaDestinos;
-	}
+    public Destino[] getListaDestinos()
+    {
+    	return listaDestinos;
+    }
 }

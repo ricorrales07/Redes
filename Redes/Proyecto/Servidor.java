@@ -1,5 +1,7 @@
 import java.net.*;
 import java.io.*;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Write a description of class Servidor here.
@@ -14,6 +16,9 @@ public class Servidor implements ManejadorDePaquetes
     private final NumeroAS numAS;
     
     private TablaVecinos vecinos;
+    
+    private Semaphore sRespuesta;
+    private InetAddress esperando;
 
     /**
      * Constructor for objects of class Servidor
@@ -41,18 +46,23 @@ public class Servidor implements ManejadorDePaquetes
         numAS = new NumeroAS(as);
         
         vecinos = TablaVecinos.getTabla();
+        
+        sRespuesta = new Semaphore(0);
     }
     
     public void maneja(Paquete_t tipoPaquete, Socket s, InputStream input)
     {
+        byte[] paquete;
+        PaqueteVecino pv;
         switch(tipoPaquete)
         {
             case SOLICITUD_DE_CONEXION:
-                byte[] paquete = new byte[10];
+                paquete = new byte[10];
                 
                 try
                 {
                     input.read(paquete);
+                    s.close();
                 }
                 catch (IOException e)
                 {
@@ -60,56 +70,113 @@ public class Servidor implements ManejadorDePaquetes
                     return;
                 }
                 
-                PaqueteVecino pv = new PaqueteVecino(tipoPaquete, paquete);
+                pv = new PaqueteVecino(tipoPaquete, paquete);
                 
-                nuevoVecino(pv, false, s);
+                procesarSolicitudDeNuevoVecino(pv);
                 
                 break;
                 
             case CONEXION_ACEPTADA:
+                paquete = new byte[10];
+                
+                try
+                {
+                    input.read(paquete);
+                    s.close();
+                }
+                catch (IOException e)
+                {
+                    System.out.println("Error al recibir paquete.");
+                    return;
+                }
+                
+                pv = new PaqueteVecino(tipoPaquete, paquete);
+                
+                if(sRespuesta.hasQueuedThreads() && esperando == pv.getIP())
+                {
+                    sRespuesta.release();
+                    vecinos.addVecino(pv, true);
+                }
+                    
+                break;
+            
             case SOLICITUD_DE_DESCONEXION:
             case PAQUETE_DE_ALCANZABILIDAD:
             default:
         }
     }
     
-    /*public boolean nuevoVecino(String ip, String mascara, String as)
+    /*Para usar desde la interfaz*/
+    public boolean solicitarNuevoVecino(String ip, String mascara) throws IllegalArgumentException, IOException // ¿Para qué ocupa la máscara?
     {
+        // Chequeamos entradas.
         InetAddress ipV, maskV;
-        NumeroAS num;
         try
         {
             ipV = InetAddress.getByName(ip);
             maskV = InetAddress.getByName(mascara);
-            num = new NumeroAS(as);
         }
         catch (UnknownHostException e)
         {
-            return false;
+            throw new IllegalArgumentException("Dirección IP inválida.");
         }
-        catch (IllegalArgumentException e)
-        {
-            return false;
-        }
-        PaqueteVecino pv = new PaqueteVecino(
-        return true;
-    }*/
-    
-    public void nuevoVecino(PaqueteVecino pv, boolean manual, Socket s)
-    {
-        vecinos.addVecino(pv, manual);
         
-        PaqueteVecino respuesta = new PaqueteVecino(Paquete_t.CONEXION_ACEPTADA, this.direccion, this.mascara, this.numAS);
+        // Armamos el paquete que vamos a enviar.
+        PaqueteVecino paqueteParaEnviar = new PaqueteVecino(Paquete_t.SOLICITUD_DE_CONEXION, this.direccion, this.mascara, this.numAS);
         
+        // Establecemos conexión con el otro router y enviamos el mensaje.
+        Socket conexion;
         OutputStream output;
         try
         {
-            output = s.getOutputStream();
-            output.write(respuesta.getBytes());
+            conexion = new Socket(ipV, Router.PUERTO_ENTRADA);
+            output = conexion.getOutputStream();
+            output.write(paqueteParaEnviar.getBytes());
+            conexion.close();
         }
         catch (IOException e)
         {
-            System.out.println("Error de comunicación.");
+            throw new IOException("No se pudo establecer la conexión con la dirección IP provista");
+        }
+        
+        // Esperamos 5 segundos por la respuesta.
+        boolean respuesta = false;
+        try
+        {
+            esperando = ipV;
+            respuesta = sRespuesta.tryAcquire(5, TimeUnit.SECONDS);
+        }
+        catch (InterruptedException e)
+        {
+            throw new RuntimeException("El hilo correspondiente a la interfaz gráfica fue interrumpido (esto no debería ocurrir).");
+        }
+        
+        // Le avisamos al usuario si llegó una respuesta o no.
+        return respuesta;
+    }
+    
+    /*Para cuando llega la solicitud de otro router.*/
+    private void procesarSolicitudDeNuevoVecino(PaqueteVecino pv)
+    {
+        // Se agrega a la tabla de vecinos.
+        vecinos.addVecino(pv, false);
+        
+        // Armamos el paquete de confirmación.
+        PaqueteVecino respuesta = new PaqueteVecino(Paquete_t.CONEXION_ACEPTADA, this.direccion, this.mascara, this.numAS);
+        
+        // Nos conectamos con el vecino nuevo y le enviamos el paquete.
+        Socket s;
+        OutputStream output;
+        try
+        {
+            s = new Socket(pv.getIP(), Router.PUERTO_ENTRADA);
+            output = s.getOutputStream();
+            output.write(respuesta.getBytes());
+            s.close();
+        }
+        catch (IOException e)
+        {
+            System.out.println("No se pudo enviar confirmación a IP " + pv.getIP().getHostAddress() + ".");
             return;
         }
     }
