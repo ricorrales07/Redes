@@ -257,6 +257,11 @@ public class Servidor implements ManejadorDePaquetes, Runnable
         // Se agrega a la tabla de vecinos.
         vecinos.addVecino(pv, false);
         
+        // Se agrega a la tabla de alcanzabilidad.
+        Destino d = new Destino(pv.getIP(), pv.getMascara());
+        d.addAS(pv.getAS());
+        alcanzabilidad.addDestino(d, false, pv.getIP());
+        
         // Armamos el paquete de confirmación.
         PaqueteVecino respuesta = new PaqueteVecino(Paquete_t.CONEXION_ACEPTADA, this.direccion, this.mascara, this.numAS);
         
@@ -299,7 +304,12 @@ public class Servidor implements ManejadorDePaquetes, Runnable
         // Lo sacamos de la tabla, puesto que no importa si responde o no.
         vecinos.removeVecino(ipV);
         
+        // Lo eliminamos de la tabla de alcanzabilidad.
+        alcanzabilidad.removeDestino(ipV);
+        
         // TODO: También hay que eliminar todas las entradas en la tabla de alcanzabilidad que comiencen por este sistema autónomo (tal vez?).
+        // Problema: No sé si estoy conectado a más de un router en el mismo sistema autónomo. ¿Y si los destinos siguen siendo alcanzables a través del otro?
+        // Solución posible: eliminar estas entradas solo si ya no quedan vecinos de ese sistema autónomo?
         
         // Armamos el paquete que vamos a enviar.
         PaqueteVecino paqueteParaEnviar = new PaqueteVecino(Paquete_t.SOLICITUD_DE_DESCONEXION, this.direccion, this.mascara, this.numAS);
@@ -360,12 +370,19 @@ public class Servidor implements ManejadorDePaquetes, Runnable
         // Se borra de la tabla de vecinos.
         vecinos.removeVecino(pv.getIP(), false, pv.getIP());
         
-        // TODO: También hay que eliminar todas las entradas en la tabla de alcanzabilidad que comiencen por este sistema autónomo.
+        // Lo eliminamos de la tabla de alcanzabilidad.
+        alcanzabilidad.removeDestino(pv.getIP());
+        
+        // TODO: También hay que eliminar todas las entradas en la tabla de alcanzabilidad que comiencen por este sistema autónomo (tal vez?).
+        // Problema: No sé si estoy conectado a más de un router en el mismo sistema autónomo. ¿Y si los destinos siguen siendo alcanzables a través del otro?
+        // Solución posible: eliminar estas entradas solo si ya no quedan vecinos de ese sistema autónomo?
     }
     
     private void procesarPaqueteDeAlcanzabilidad(InputStream input) throws IOException
     {
-        // Debería ignorarlo si no viene de un vecino, pero hace falta el IP para saber si lo es o no...
+        // TODO: Debería ignorarlo si no viene de un vecino, pero hace falta el IP para saber si lo es o no...
+        
+        // TODO: Falta ignorar el paquete si la ruta es más larga que la que ya está en la tabla.
         
         NumeroAS origen;
         byte[] ASorigen = new byte[2];

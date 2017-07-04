@@ -9,6 +9,10 @@ import java.net.*;
  */
 public class InterfazDeOperador implements Runnable
 {
+    // TODO: Falta controlar bien todas las excepciones.
+    
+    // TODO: Buscar cómo formatear bonito las tablas.
+    
     Scanner s = new Scanner(System.in);
     
     private static final String ayuda =
@@ -17,7 +21,9 @@ public class InterfazDeOperador implements Runnable
         "nvecino <IP> <Máscara> : envía una solicitud de vecino al router con dirección <IP> y máscara <Máscara>.\n" +
         "muestra <tabla> : despliega distinta información dependiendo del valor de <tabla>:\n" +
         "\tvecinos : despliega la tabla de vecinos." +
+        "\tdestinos : despliega la tabla de alcanzabilidad." +
         "bvecino <IP> : borra un vecino de la tabla de vecinos y envía una solicitud de borrado al vecino corresponiente.\n" +
+        "ndestino <IP> <Máscara> <Lista de sistemas autónomos> : agrega un nuevo destino a la talba de alcanzabilidad" +
         "salir : termina el proceso.";
     
     public String[] inicializar()
@@ -37,7 +43,7 @@ public class InterfazDeOperador implements Runnable
     public void inicializarDestinos()
     {
         String input;
-        System.out.println("Inserte a continuación la IP, máscara y ruta de sistemas autónomos de cada destino alcanzable desde este router:");
+        System.out.println("Inserte a continuación la IP, máscara y ruta de sistemas autónomos de cada destino alcanzable desde este router (escriba \"fin\" para terminar):");
         input = s.nextLine();
         while (!input.equals("fin"))
         {
@@ -74,6 +80,7 @@ public class InterfazDeOperador implements Runnable
                     break;
                     
                 case "nvecino":
+                    System.out.println("Enviando solicitud de conexión a " + comando[1] + "...");
                     exito = false;
                     try
                     {

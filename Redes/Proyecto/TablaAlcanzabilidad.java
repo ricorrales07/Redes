@@ -57,6 +57,11 @@ public class TablaAlcanzabilidad
             registro.log(Level.INFO, "Nuevo destino añadido a la tabla de alcanzabilidad (vía " + origen.getHostAddress() + "): {0}", d.logInfo());
     }
     
+    public synchronized void removeDestino(InetAddress ip)
+    {
+        tabla.remove(ip);
+    }
+    
     public synchronized Collection<Destino> getAllDestinos()
     {
         return tabla.values();
