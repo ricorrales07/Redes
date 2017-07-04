@@ -16,7 +16,7 @@ public class PaqueteAlcanzabilidad
 	Destino [] listaDestinos; 
 	
     
-    public PaqueteVecino(Paquete_t tipo, byte[] paquete)
+    public PaqueteAlcanzabilidad(Paquete_t tipo, byte[] paquete)
     {
         this.tipo = tipo;
         try
