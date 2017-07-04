@@ -17,10 +17,12 @@ public class Router
     
     private static ServerSocket sSocket;
     private static InterfazDeOperador interfaz;
-    private static Servidor server;
+    public static Servidor server;
     
     public static int main()
     {
+        interfaz = new InterfazDeOperador();
+        
         try
         {
             System.out.println("Iniciando router...");
@@ -32,9 +34,23 @@ public class Router
             return 1;
         }
         
-        String ip = "", mascara = "", as = "";
-        System.out.println("Insertar dirección IP: ");
-        ip = System.console().readLine();
+        while (server == null)
+        {
+            try
+            {
+                String[] s = interfaz.inicializar();
+                server = new Servidor(s[0], s[1], s[2]);
+            }
+            catch (Exception e)
+            {
+                System.out.println(e.toString());
+                System.out.println("Inténtelo de nuevo: ");
+            }
+        }
+        
+        //String ip = "", mascara = "", as = "";
+        //System.out.println("Insertar dirección IP: ");
+        //ip = System.console().readLine();
         // etc... Esto podría pasarse a la interfaz.
         // server = new Servidor(ip, mascara, as);
         
@@ -42,6 +58,7 @@ public class Router
         DespachadorDePaquetes.subscribe(Paquete_t.SOLICITUD_DE_CONEXION, server);
         DespachadorDePaquetes.subscribe(Paquete_t.CONEXION_ACEPTADA, server);
         DespachadorDePaquetes.subscribe(Paquete_t.SOLICITUD_DE_DESCONEXION, server);
+        DespachadorDePaquetes.subscribe(Paquete_t.CONFIRMACION_DE_DESCONEXION, server);
         DespachadorDePaquetes.subscribe(Paquete_t.PAQUETE_DE_ALCANZABILIDAD, server);
         
         // Un hilo para atender la interfaz de usuario.

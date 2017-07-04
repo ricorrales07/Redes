@@ -15,7 +15,7 @@ public class NumeroAS
     {
         as = new byte[2];
          
-        String[] decimales = num.split(".");
+        String[] decimales = num.split("\\.");
         if (decimales.length != 2)
               throw new IllegalArgumentException("Dirección de Sistema Autónomo inválida. Debe llevar 2 bytes.");
         else
@@ -39,6 +39,7 @@ public class NumeroAS
                 else
                 {
                     as[i] = (byte) decimales_int[i];
+                    legible = num;
                 }
             }
         }

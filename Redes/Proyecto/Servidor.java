@@ -92,7 +92,7 @@ public class Servidor implements ManejadorDePaquetes
                 
                 pv = new PaqueteVecino(tipoPaquete, paquete);
                 
-                if(sRespuesta.hasQueuedThreads() && esperando == pv.getIP())
+                if(sRespuesta.hasQueuedThreads() && esperando.equals(pv.getIP()))
                 {
                     sRespuesta.release();
                     vecinos.addVecino(pv, true);
@@ -179,5 +179,11 @@ public class Servidor implements ManejadorDePaquetes
             System.out.println("No se pudo enviar confirmación a IP " + pv.getIP().getHostAddress() + ".");
             return;
         }
+        //System.out.println("Solicitud de vecino confirmada a " + pv.getIP());
+    }
+    
+    public String desplegarTablaDeVecinos()
+    {
+        return vecinos.toString();
     }
 }

@@ -44,7 +44,7 @@ public class PaqueteVecino
     
     public byte[] getBytes()
     {
-        byte[] type = { (byte) ((tipo == Paquete_t.SOLICITUD_DE_CONEXION) ? 1 : 2) };
+        byte[] type = { (byte) tipo.ordinal() };
         
         return Router.concat(type, as.getBytes(), ip.getAddress(), mascara.getAddress());
     }

@@ -2,6 +2,7 @@ import java.util.logging.*;
 import java.util.Hashtable;
 import java.net.*;
 import java.io.IOException;
+import java.util.Collection;
 
 // <>
 
@@ -26,7 +27,15 @@ public class TablaVecinos
             as = asVecino;
         }
         
-        // No sé si necesita un método toString()
+        public String toString()
+        {
+            return ip.getHostAddress() + "\t" + mask.getHostAddress() + "\t" + as.toString();
+        }
+        
+        public String logInfo()
+        {
+            return "IP: " + ip.getHostAddress() + ", Máscara: " + mask.getHostAddress() + ", AS:" + as.toString();
+        }
     }
     
     private Hashtable<InetAddress, Vecino> tabla;
@@ -73,9 +82,9 @@ public class TablaVecinos
         Vecino vecinoNuevo = new Vecino(ipVecino, mascaraVecino, asVecino);
         tabla.put(ipVecino, vecinoNuevo);
         if (manual)
-            registro.log(Level.INFO, "Nuevo vecino añadido a la tabla de vecinos (via manual): {0}", vecinoNuevo);
+            registro.log(Level.INFO, "Nuevo vecino añadido a la tabla de vecinos (via manual): {0}", vecinoNuevo.logInfo());
         else
-            registro.log(Level.INFO, "Nuevo vecino añadido a la tabla de vecinos (vía " + origen.getHostAddress() + "): {1}", vecinoNuevo);
+            registro.log(Level.INFO, "Nuevo vecino añadido a la tabla de vecinos (vía " + origen.getHostAddress() + "): {0}", vecinoNuevo.logInfo());
     }
 
     public synchronized void removeVecino(InetAddress ipVecino) throws IllegalArgumentException
@@ -94,19 +103,28 @@ public class TablaVecinos
                 throw new IllegalArgumentException("No se encontró la IP " + ipVecino.getHostAddress() + " para eliminar de la tabla.");
             }
             else if (manual)
-                registro.log(Level.INFO, "Vecino eliminado (vía manual): {0}", vecinoEliminado);
+                registro.log(Level.INFO, "Vecino eliminado (vía manual): {0}", vecinoEliminado.logInfo());
             else
-                registro.log(Level.INFO, "Vecino eliminado (vía " + origen.getHostAddress() + "): {0}", vecinoEliminado);
+                registro.log(Level.INFO, "Vecino eliminado (vía " + origen.getHostAddress() + "): {0}", vecinoEliminado.logInfo());
         }
         catch (NullPointerException e)
         {
-            registro.warning("Se intentó recibió un puntero nulo para eliminar");
-            throw new IllegalArgumentException("Se intentó recibió un puntero nulo para eliminar");
+            registro.warning("Se recibió un puntero nulo para eliminar");
+            throw new IllegalArgumentException("Se recibió un puntero nulo para eliminar");
         }
     }
     
     public synchronized boolean esVecino(InetAddress ip)
     {
         return tabla.containsKey(ip);
+    }
+    
+    public String toString()
+    {
+        String retornable = "Dirección IP \t Máscara de red \t Sistema Autónomo \n";
+        Collection<Vecino> tablaIterable = tabla.values();
+        for (Vecino v : tablaIterable)
+            retornable += v.toString() + "\n";
+        return retornable;
     }
 }
