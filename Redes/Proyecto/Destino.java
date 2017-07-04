@@ -50,6 +50,11 @@ public class Destino
     {
         return mascara;
     }
+    
+    public int getLongRuta()
+    {
+        return ruta.size();
+    }
 
     public byte[] getBytes()
     {

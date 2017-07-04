@@ -382,8 +382,6 @@ public class Servidor implements ManejadorDePaquetes, Runnable
     {
         // TODO: Debería ignorarlo si no viene de un vecino, pero hace falta el IP para saber si lo es o no...
         
-        // TODO: Falta ignorar el paquete si la ruta es más larga que la que ya está en la tabla.
-        
         NumeroAS origen;
         byte[] ASorigen = new byte[2];
         byte[] numDestinos = new byte[4];
@@ -412,6 +410,13 @@ public class Servidor implements ManejadorDePaquetes, Runnable
             byte[] cantAS = new byte[2];
             input.read(cantAS);
             short cAS = ByteBuffer.wrap(cantAS).getShort();
+            
+            Destino dAnterior = alcanzabilidad.getDestino(d.getIP());
+            if(cAS + 1 > dAnterior.getLongRuta())
+            {
+                input.skip(cAS * 2);
+                continue;
+            }
             
             d.addAS(origen);
             
