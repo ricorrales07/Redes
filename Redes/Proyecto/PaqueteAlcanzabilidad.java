@@ -22,9 +22,10 @@ public class PaqueteAlcanzabilidad
         try
         {
             as = new NumeroAS(Arrays.copyOfRange(paquete, 0, 2));
-	    cantDestinos = new byte [(Arrays.copyOfRange(paquete, 2, 6))]	
+	    cantDestinos = new byte [(Arrays.copyOfRange(paquete, 2, 6))];	
             ip = InetAddress.getByAddress(Arrays.copyOfRange(paquete, 6, 10));
             mascara = InetAddress.getByAddress(Arrays.copyOfRange(paquete, 10, 14));
+	    listaDestinos = new Destino[(Arrays.copyOfRange(paquete, 14, paquete.length)];
         }
         catch (IllegalArgumentException e)
         {
