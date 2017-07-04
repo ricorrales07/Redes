@@ -6,23 +6,23 @@ import java.io.*;
 
 /**
  * Write a description of class Main here.
- * 
- * @author (your name) 
+ *
+ * @author (your name)
  * @version (a version number or a date)
  */
 public class Router
 {
     // constante
     public static final int PUERTO_ENTRADA = 57809;
-    
+
     private static ServerSocket sSocket;
     private static InterfazDeOperador interfaz;
     public static Servidor server;
-    
-    public static int main()
+
+    public static void main(String[] args)
     {
         interfaz = new InterfazDeOperador();
-        
+
         try
         {
             System.out.println("Iniciando router...");
@@ -31,9 +31,9 @@ public class Router
         catch (IOException e)
         {
             System.out.println("ERROR: No se pudo obtener el puerto " + PUERTO_ENTRADA + ". Abortando...");
-            return 1;
+            //return 1;
         }
-        
+
         while (server == null)
         {
             try
@@ -47,25 +47,25 @@ public class Router
                 System.out.println("Inténtelo de nuevo: ");
             }
         }
-        
+
         //String ip = "", mascara = "", as = "";
         //System.out.println("Insertar dirección IP: ");
         //ip = System.console().readLine();
         // etc... Esto podría pasarse a la interfaz.
         // server = new Servidor(ip, mascara, as);
-        
+
         // Inicializar servicios del despachador:
         DespachadorDePaquetes.subscribe(Paquete_t.SOLICITUD_DE_CONEXION, server);
         DespachadorDePaquetes.subscribe(Paquete_t.CONEXION_ACEPTADA, server);
         DespachadorDePaquetes.subscribe(Paquete_t.SOLICITUD_DE_DESCONEXION, server);
         DespachadorDePaquetes.subscribe(Paquete_t.CONFIRMACION_DE_DESCONEXION, server);
         DespachadorDePaquetes.subscribe(Paquete_t.PAQUETE_DE_ALCANZABILIDAD, server);
-        
+
         // Un hilo para atender la interfaz de usuario.
         interfaz = new InterfazDeOperador();
         Thread i = new Thread(interfaz);
         i.start();
-        
+
         while (true)
         {
             // Se crea un hilo nuevo con cada nueva conexión.
@@ -83,7 +83,7 @@ public class Router
             t.start();
         }
     }
-    
+
     // Para concatenar arreglos de bytes.
     public static byte[] concat(byte[]... arrays) {
         int length = 0;
