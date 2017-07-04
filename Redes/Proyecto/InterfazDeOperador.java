@@ -44,8 +44,10 @@ public class InterfazDeOperador implements Runnable
             String[] comando = opcion.split(" ");
             switch(comando[0])
             {
+                // Muestra el menú de ayuda
                 case "ayuda":
                     System.out.println(ayuda);
+                // Solicita un nuevo vecino dadas una IP y una máscara
                 case "nvecino":
                     boolean exito = false;
                     try
@@ -63,14 +65,30 @@ public class InterfazDeOperador implements Runnable
                         System.out.println("No se pudo agregar al vecino");
                     break;
 
-                case "muestra":
+                case "muestra": // ej: muestra vecinos
                     switch(comando[1])
                     {
-                        case "vecinos":
+                        case "vecinos": // Despliega la tabla de vecinos
                             System.out.println(Router.server.desplegarTablaDeVecinos());
                     }
                     break;
-                    
+                case "bvecino": // Borra un vecino
+                    //boolean exito = false;
+                    try
+                    {
+                        // Convierte el string de IP a InetAddress
+                        String ipS = comando[1];
+                        InetAddress ip = InetAddress.getByName(ipS);
+                        Router.server.getTablaVecinos().removeVecino(ip); // Remueve el vecino del IP especificado
+                        // exito = Router.server.solicitarNuevoVecino(comando[1], comando[2]);
+                    }
+                    catch (Exception e)
+                    {
+                        System.out.println(e.getMessage());
+                        break;
+                    }
+                    break;
+
                 case "exit":
                 case "quit":
                     System.exit(0);

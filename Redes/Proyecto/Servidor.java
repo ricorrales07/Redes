@@ -5,8 +5,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Write a description of class Servidor here.
- * 
- * @author (your name) 
+ *
+ * @author (your name)
  * @version (a version number or a date)
  */
 public class Servidor implements ManejadorDePaquetes
@@ -14,10 +14,10 @@ public class Servidor implements ManejadorDePaquetes
     private final InetAddress direccion;
     private final InetAddress mascara; //todavía no estoy seguro de para qué vamos a usar la máscara...
     private final NumeroAS numAS;
-    
+
     private TablaVecinos vecinos;
     private TablaAlcanzabilidad alcanzabilidad;
-    
+
     private Semaphore sRespuesta;
     private InetAddress esperando;
 
@@ -43,14 +43,14 @@ public class Servidor implements ManejadorDePaquetes
         {
             throw new IllegalArgumentException("Máscara inválida.");
         }
-        
+
         numAS = new NumeroAS(as);
-        
+
         vecinos = TablaVecinos.getTabla();
-        
+
         sRespuesta = new Semaphore(0);
     }
-    
+
     public void maneja(Paquete_t tipoPaquete, Socket s, InputStream input)
     {
         byte[] paquete;
@@ -60,7 +60,7 @@ public class Servidor implements ManejadorDePaquetes
         {
             case SOLICITUD_DE_CONEXION:
                 paquete = new byte[10];
-                
+
                 try
                 {
                     input.read(paquete);
@@ -71,16 +71,16 @@ public class Servidor implements ManejadorDePaquetes
                     System.out.println("Error al recibir paquete.");
                     return;
                 }
-                
+
                 pv = new PaqueteVecino(tipoPaquete, paquete);
-                
+
                 procesarSolicitudDeNuevoVecino(pv);
-                
+
                 break;
-                
+
             case CONEXION_ACEPTADA:
                 paquete = new byte[10];
-                
+
                 try
                 {
                     input.read(paquete);
@@ -91,23 +91,23 @@ public class Servidor implements ManejadorDePaquetes
                     System.out.println("Error al recibir paquete.");
                     return;
                 }
-                
+
                 pv = new PaqueteVecino(tipoPaquete, paquete);
-                
+
                 if(sRespuesta.hasQueuedThreads() && esperando.equals(pv.getIP()))
                 {
                     sRespuesta.release();
                     vecinos.addVecino(pv, true);
                 }
-                    
+
                 break;
-            
+
             case SOLICITUD_DE_DESCONEXION:
             case PAQUETE_DE_ALCANZABILIDAD:
             default:
         }
     }
-    
+
     /*Para usar desde la interfaz*/
     public boolean solicitarNuevoVecino(String ip, String mascara) throws IllegalArgumentException, IOException // ¿Para qué ocupa la máscara?
     {
@@ -122,10 +122,10 @@ public class Servidor implements ManejadorDePaquetes
         {
             throw new IllegalArgumentException("Dirección IP inválida.");
         }
-        
+
         // Armamos el paquete que vamos a enviar.
         PaqueteVecino paqueteParaEnviar = new PaqueteVecino(Paquete_t.SOLICITUD_DE_CONEXION, this.direccion, this.mascara, this.numAS);
-        
+
         // Establecemos conexión con el otro router y enviamos el mensaje.
         Socket conexion;
         OutputStream output;
@@ -140,7 +140,7 @@ public class Servidor implements ManejadorDePaquetes
         {
             throw new IOException("No se pudo establecer la conexión con la dirección IP provista");
         }
-        
+
         // Esperamos 5 segundos por la respuesta.
         boolean respuesta = false;
         try
@@ -152,20 +152,20 @@ public class Servidor implements ManejadorDePaquetes
         {
             throw new RuntimeException("El hilo correspondiente a la interfaz gráfica fue interrumpido (esto no debería ocurrir).");
         }
-        
+
         // Le avisamos al usuario si llegó una respuesta o no.
         return respuesta;
     }
-    
+
     /*Para cuando llega la solicitud de otro router.*/
     private void procesarSolicitudDeNuevoVecino(PaqueteVecino pv)
     {
         // Se agrega a la tabla de vecinos.
         vecinos.addVecino(pv, false);
-        
+
         // Armamos el paquete de confirmación.
         PaqueteVecino respuesta = new PaqueteVecino(Paquete_t.CONEXION_ACEPTADA, this.direccion, this.mascara, this.numAS);
-        
+
         // Nos conectamos con el vecino nuevo y le enviamos el paquete.
         Socket s;
         OutputStream output;
@@ -183,9 +183,13 @@ public class Servidor implements ManejadorDePaquetes
         }
         //System.out.println("Solicitud de vecino confirmada a " + pv.getIP());
     }
-    
+
     public String desplegarTablaDeVecinos()
     {
         return vecinos.toString();
+    }
+
+    public TablaVecinos getTablaVecinos(){
+        return vecinos;
     }
 }
