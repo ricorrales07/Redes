@@ -48,11 +48,7 @@ public class Router
             }
         }
         
-        //String ip = "", mascara = "", as = "";
-        //System.out.println("Insertar dirección IP: ");
-        //ip = System.console().readLine();
-        // etc... Esto podría pasarse a la interfaz.
-        // server = new Servidor(ip, mascara, as);
+        interfaz.inicializarDestinos();
         
         // Inicializar servicios del despachador:
         DespachadorDePaquetes.subscribe(Paquete_t.SOLICITUD_DE_CONEXION, server);
@@ -65,6 +61,10 @@ public class Router
         interfaz = new InterfazDeOperador();
         Thread i = new Thread(interfaz);
         i.start();
+        
+        // Un hilo para enviar información de alcanzabilidad.
+        Thread s = new Thread(server);
+        s.start();
         
         while (true)
         {

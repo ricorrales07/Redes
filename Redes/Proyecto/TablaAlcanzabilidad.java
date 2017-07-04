@@ -3,6 +3,7 @@ import java.util.Hashtable;
 import java.net.*;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 
 // <>
 
@@ -14,39 +15,17 @@ import java.util.Arrays;
  */
 public class TablaAlcanzabilidad
 {
-    private class Dest
-    {
-		private InetAddress ip;
-    	private InetAddress mascara;
-    	private NumeroAS [] as;
-        public Dest(byte[] paquete)
-        {
-            try
-            {
-                ip = InetAddress.getByAddress(Arrays.copyOfRange(paquete, 6, 10));
-                mascara = InetAddress.getByAddress(Arrays.copyOfRange(paquete, 10, 14));
-            }
-            catch (IllegalArgumentException e)
-            {
-            	throw new RuntimeException("Esto no debería pasar");
-            }
-            catch (UnknownHostException e)
-            {
-                throw new RuntimeException("Esto no debería pasar");
-            }
-        }
-    }
-    
-    private Hashtable<InetAddress, Dest> tabla;
+    private Hashtable<InetAddress, Destino> tabla;
     private Logger registro;
     private FileHandler fHandler;
     private SimpleFormatter sFormatter;
+    
     // patrón singleton
     private static TablaAlcanzabilidad tablaUnica;
 
     private TablaAlcanzabilidad() throws IOException
     {
-        fHandler = new FileHandler("logTablaAlcnzabilidad.txt");
+        fHandler = new FileHandler("logTablaAlcanzabilidad.txt");
         sFormatter = new SimpleFormatter();
         registro = Logger.getLogger("Tabla de alcanzabilidad");
         
@@ -54,7 +33,7 @@ public class TablaAlcanzabilidad
         registro.addHandler(fHandler);
         registro.setLevel(Level.INFO);
         
-        tabla = new Hashtable<InetAddress, Dest>();        
+        tabla = new Hashtable<InetAddress, Destino>();        
     }
     
     public static synchronized TablaAlcanzabilidad getTabla() throws IOException
@@ -64,11 +43,31 @@ public class TablaAlcanzabilidad
         return tablaUnica;
     }
     
-    public synchronized void addPaquete(InetAddress ipVecino ,byte [] paquete)
+    public synchronized void addDestino(Destino d)
     {
-        Dest paqueteNuevo = new Dest(paquete);
-        tabla.put(ipVecino, paqueteNuevo);
-        registro.log(Level.INFO, "Nuevo paquete de alcanzabilidad añadido a la tabla de alcanzabilidad");
+        addDestino(d, true, InetAddress.getLoopbackAddress());
     }
-   
+    
+    public synchronized void addDestino(Destino d, boolean manual, InetAddress origen)
+    {
+        tabla.put(d.getIP(), d);
+        if (manual)
+            registro.log(Level.INFO, "Nuevo destino añadido a la tabla de alcanzabilidad (vía manual): {0}", d.logInfo());
+        else
+            registro.log(Level.INFO, "Nuevo destino añadido a la tabla de alcanzabilidad (vía " + origen.getHostAddress() + "): {0}", d.logInfo());
+    }
+    
+    public synchronized Collection<Destino> getAllDestinos()
+    {
+        return tabla.values();
+    }
+    
+    public synchronized String toString()
+    {
+        String retornable = "Dirección IP \t Máscara de red \t Ruta \n";
+        Collection<Destino> tablaIterable = tabla.values();
+        for (Destino v : tablaIterable)
+            retornable += v.toString() + "\n";
+        return retornable;
+    }
 }

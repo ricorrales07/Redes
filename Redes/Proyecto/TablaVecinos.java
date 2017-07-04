@@ -3,6 +3,8 @@ import java.util.Hashtable;
 import java.net.*;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
+import java.util.ArrayList;
 
 // <>
 
@@ -25,6 +27,11 @@ public class TablaVecinos
             ip = ipVecino;
             mask = mascaraVecino;
             as = asVecino;
+        }
+        
+        public InetAddress getIP()
+        {
+            return ip;
         }
         
         public String toString()
@@ -126,5 +133,13 @@ public class TablaVecinos
         for (Vecino v : tablaIterable)
             retornable += v.toString() + "\n";
         return retornable;
+    }
+    
+    public List<InetAddress> getListaIPs()
+    {
+        ArrayList<InetAddress> lista = new ArrayList<InetAddress>();
+        for (Vecino v : tabla.values())
+            lista.add(v.getIP());
+        return lista;
     }
 }

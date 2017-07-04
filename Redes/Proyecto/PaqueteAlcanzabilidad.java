@@ -1,6 +1,7 @@
 import java.util.Arrays;
 import java.net.*;
-
+import java.util.ArrayList;
+import java.nio.ByteBuffer;
 
 /**
  * Write a description of class PaqueteVecino here.
@@ -10,13 +11,11 @@ import java.net.*;
  */
 public class PaqueteAlcanzabilidad
 {
-    Paquete_t tipo;
     NumeroAS as;
-    Destino [] listaDestinos; 
+    ArrayList<Destino> listaDestinos; 
     
-    public PaqueteAlcanzabilidad(Paquete_t tipo, byte[] paquete)
+    public PaqueteAlcanzabilidad(byte[] paquete)
     {
-        this.tipo = tipo;
         try
         {
             as = new NumeroAS(Arrays.copyOfRange(paquete, 0 , 2)); 
@@ -25,19 +24,14 @@ public class PaqueteAlcanzabilidad
         {
             throw new RuntimeException("Esto no debería pasar");
         }
+        
+        listaDestinos = new ArrayList<Destino>();
     }
     
-    public PaqueteAlcanzabilidad(Paquete_t tipo, NumeroAS as, Destino [] listaDestinos)
+    public PaqueteAlcanzabilidad(NumeroAS as)
     {
-        this.tipo = tipo;
         this.as = as;
-        this.listaDestinos = listaDestinos;
-    }
-    
-    
-    public Paquete_t getTipo()
-    {
-        return tipo;
+        listaDestinos = new ArrayList<Destino>();
     }
       
     public NumeroAS getAS()
@@ -45,9 +39,27 @@ public class PaqueteAlcanzabilidad
         return as;
     }
     
+    public void addDestino(Destino d)
+    {
+        listaDestinos.add(d);
+    }
     
-    public Destino[] getListaDestinos()
+    public ArrayList<Destino> getListaDestinos()
     {
         return listaDestinos;
+    }
+    
+    public byte[] getBytes()
+    {
+        byte[] tipo = {(byte) Paquete_t.PAQUETE_DE_ALCANZABILIDAD.ordinal()};
+        byte[] as = this.as.getBytes();
+        byte[] cantDestinos = new byte[4];
+        cantDestinos = ByteBuffer.wrap(cantDestinos).putInt(this.listaDestinos.size()).array();
+        
+        byte[] destinos = new byte[0];
+        for (Destino d : this.listaDestinos)
+            destinos = Router.concat(destinos, d.getBytes());
+        
+        return Router.concat(tipo, as, cantDestinos, destinos);
     }
 }

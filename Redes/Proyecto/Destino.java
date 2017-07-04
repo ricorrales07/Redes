@@ -1,6 +1,7 @@
 import java.util.Arrays;
 import java.net.*;
-
+import java.util.ArrayList;
+import java.nio.ByteBuffer;
 
 /**
  * Write a description of class PaqueteVecino here.
@@ -12,14 +13,14 @@ public class Destino
 {
     InetAddress ip;
     InetAddress mascara;
-    NumeroAS [] as;
+    ArrayList<NumeroAS> ruta;
     
     public Destino(byte[] paquete)
     {
         try
         {
-            ip = InetAddress.getByAddress(Arrays.copyOfRange(paquete, 6, 10));
-            mascara = InetAddress.getByAddress(Arrays.copyOfRange(paquete, 10, 14));
+            ip = InetAddress.getByAddress(Arrays.copyOfRange(paquete, 0, 4));
+            mascara = InetAddress.getByAddress(Arrays.copyOfRange(paquete, 4, 8));
         }
         catch (IllegalArgumentException e)
         {
@@ -29,8 +30,16 @@ public class Destino
         {
             throw new RuntimeException("Esto no debería pasar");
         }
+        
+        ruta = new ArrayList<NumeroAS>();
     }
     
+    public Destino(InetAddress ip, InetAddress mascara)
+    {
+        this.ip = ip;
+        this.mascara = mascara;
+        ruta = new ArrayList<NumeroAS>();
+    }
     
     public InetAddress getIP()
     {
@@ -41,5 +50,38 @@ public class Destino
     {
         return mascara;
     }
- 
+
+    public byte[] getBytes()
+    {
+        byte[] ip = this.ip.getAddress();
+        byte[] mask = this.mascara.getAddress();
+        byte[] cantAS = ByteBuffer.allocate(2).putShort((short) this.ruta.size()).array();
+        
+        byte[] ruta = new byte[0];
+        for (NumeroAS a : this.ruta)
+            ruta = Router.concat(ruta, a.getBytes());
+        
+        return Router.concat(ip, mask, cantAS, ruta);
+    }
+    
+    public void addAS (NumeroAS as)
+    {
+        ruta.add(as);
+    }
+    
+    public String logInfo()
+    {
+        String logInfo = "IP: " + ip + ", máscara: " + mascara + "\n" + "Ruta: ";
+        for (NumeroAS n : ruta)
+            logInfo += n.toString() + ", ";
+        return logInfo.substring(0, logInfo.length()-2);
+    }
+    
+    public String toString()
+    {
+        String retornable = ip.getHostAddress() + "\t" + mascara.getHostAddress() + "\t";
+        for(NumeroAS n : ruta)
+            retornable += n.toString() + ", ";
+        return retornable;
+    }
 }
