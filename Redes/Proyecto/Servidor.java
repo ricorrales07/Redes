@@ -104,20 +104,6 @@ public class Servidor implements ManejadorDePaquetes
             
             case SOLICITUD_DE_DESCONEXION:
             case PAQUETE_DE_ALCANZABILIDAD:
-                
-                try
-                {
-                    input.read(paquete);
-                    s.close();
-                }
-                catch (IOException e)
-                {
-                    System.out.println("Error al recibir paquete.");
-                    return;
-                }
-                
-                pa = new PaqueteAlcanzabilidad(tipoPaquete, paquete);
-                break;
             default:
         }
     }
