@@ -14,6 +14,8 @@ public class Destino
     InetAddress mascara;
     byte [] cantAS;
     
+    
+    
     public InetAddress getIP()
     {
         return ip;
