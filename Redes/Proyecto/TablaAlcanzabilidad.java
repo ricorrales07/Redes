@@ -24,7 +24,7 @@ public class TablaAlcanzabilidad
         public PaqueteAlcanzabilidad(Paquete_t tipoV,NumeroAS asVecino, byte [] cantDV, Destino [] listaDV)
         {
             tipo = tipoV;
-			as = asVecino;
+	    as = asVecino;
             cantDestinos = cantDV;
             listaDestinos = listaDV;
         }
