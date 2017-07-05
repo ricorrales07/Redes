@@ -54,7 +54,7 @@ public class TablaAlcanzabilidad
         if (manual)
             registro.log(Level.INFO, "Nuevo destino añadido a la tabla de alcanzabilidad (vía manual): {0}", d.logInfo());
         else
-            registro.log(Level.INFO, "Nuevo destino añadido a la tabla de alcanzabilidad (vía " + /*origen.getHostAddress()*/ "externa" + "): {0}", d.logInfo());
+            registro.log(Level.INFO, "Nuevo destino añadido a la tabla de alcanzabilidad (vía " + origen.getHostAddress()  + "): {0}", d.logInfo());
     }
     
     public synchronized void removeDestino(InetAddress ip)
@@ -74,10 +74,18 @@ public class TablaAlcanzabilidad
     
     public synchronized String toString()
     {
-        String retornable = "Dirección IP \t Máscara de red \t Ruta \n";
+        String retornable = "Dirección IP \t Máscara de red \t IP Salida \t Ruta \n";
         Collection<Destino> tablaIterable = tabla.values();
         for (Destino v : tablaIterable)
             retornable += v.toString() + "\n";
         return retornable;
     }
+    
+    public synchronized void removeAll(InetAddress ip){
+        for (Destino v : tabla.values())
+            if (v.getIPSalida().equals(ip)){
+                tabla.remove(v.getIP());
+            }
+    }
+    
 }

@@ -1,7 +1,8 @@
 import java.net.*;
 import java.lang.Thread;
 import java.io.*;
-
+import java.util.Queue; 
+import java.util.Hashtable;
 // <>
 
 /**
@@ -28,6 +29,16 @@ public class Router
     private static ServerSocket sSocket;
     private static InterfazDeOperador interfaz;
     
+    public static Hashtable<InetAddress,Queue<Integer>> memoriaCompartida;
+    public static Hashtable<InetAddress, Thread> hilosActivos;
+    
+    public static Thread hiloAlcanzabilidad;
+    
+    public static InetAddress ipLocal;
+    public static InetAddress mascaraLocal;
+    public static NumeroAS numASLocal;
+    
+    
     public static int main()
     {
         interfaz = new InterfazDeOperador();
@@ -43,12 +54,14 @@ public class Router
             return 1;
         }
         
-        while (server == null)
+        while (ipLocal == null || mascaraLocal == null || numASLocal == null )
         {
             try
             {
                 String[] s = interfaz.inicializar();
-                server = new Servidor(s[0], s[1], s[2]);
+                ipLocal = InetAddress.getByName(s[0]);
+                mascaraLocal = InetAddress.getByName(s[1]);
+                numASLocal = new NumeroAS(s[2]);
             }
             catch (Exception e)
             {
@@ -65,8 +78,8 @@ public class Router
         i.start();
         
         // Un hilo para enviar información de alcanzabilidad.
-        HiloAlcanzabilidad h = new Thread(new HiloAlcanzabilidad());
-        h.start();
+        hiloAlcanzabilidad = new Thread(new HiloAlcanzabilidad());
+        hiloAlcanzabilidad.start();
         
         while (true)
         {
@@ -87,7 +100,7 @@ public class Router
             
             if (tipo == Paquete_t.SOLICITUD_DE_CONEXION)
             {
-                Thread t = new Thread(new Conexion(ss, false));
+                Thread t = new Thread(new Conexion(ss));
                 t.start();
             }
         }

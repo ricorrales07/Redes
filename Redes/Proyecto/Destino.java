@@ -14,8 +14,9 @@ public class Destino
     InetAddress ip;
     InetAddress mascara;
     ArrayList<NumeroAS> ruta;
+    InetAddress ipSalida;
     
-    public Destino(byte[] paquete)
+    public Destino(byte[] paquete, InetAddress ipSalida)
     {
         try
         {
@@ -30,14 +31,15 @@ public class Destino
         {
             throw new RuntimeException("Esto no debería pasar");
         }
-        
+        this.ipSalida = ipSalida;
         ruta = new ArrayList<NumeroAS>();
     }
     
-    public Destino(InetAddress ip, InetAddress mascara)
+    public Destino(InetAddress ip, InetAddress mascara, InetAddress ipSalida)
     {
         this.ip = ip;
         this.mascara = mascara;
+        this.ipSalida = ipSalida;
         ruta = new ArrayList<NumeroAS>();
     }
     
@@ -54,6 +56,10 @@ public class Destino
     public int getLongRuta()
     {
         return ruta.size();
+    }
+    
+    public InetAddress getIPSalida(){
+        return ipSalida;
     }
 
     public byte[] getBytes()
@@ -76,7 +82,7 @@ public class Destino
     
     public String logInfo()
     {
-        String logInfo = "IP: " + ip + ", máscara: " + mascara + "\n" + "Ruta: ";
+        String logInfo = "IP: " + ip + ", máscara: " + mascara + ", IP Salida: " + ipSalida + "\n" + "Ruta: ";
         for (NumeroAS n : ruta)
             logInfo += n.toString() + ", ";
         return logInfo.substring(0, logInfo.length()-2);
