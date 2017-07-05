@@ -4,6 +4,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.Arrays;
 
 /**
  * Write a description of class Servidor here.
@@ -104,7 +105,7 @@ public class Servidor implements ManejadorDePaquetes, Runnable
                 try
                 {
                     input.read(paquete);
-                    s.close();
+                    //s.close();
                 }
                 catch (IOException e)
                 {
@@ -114,11 +115,11 @@ public class Servidor implements ManejadorDePaquetes, Runnable
                 
                 pv = new PaqueteVecino(tipoPaquete, paquete);
                 
-                procesarSolicitudDeNuevoVecino(pv);
+                procesarSolicitudDeNuevoVecino(pv, s);
                 
                 break;
                 
-            case CONEXION_ACEPTADA:
+            /*case CONEXION_ACEPTADA:
                 paquete = new byte[10];
                 
                 try
@@ -140,7 +141,7 @@ public class Servidor implements ManejadorDePaquetes, Runnable
                     vecinos.addVecino(pv, true);
                 }
                     
-                break;
+                break;*/
             
             case SOLICITUD_DE_DESCONEXION:
                 paquete = new byte[10];
@@ -148,7 +149,7 @@ public class Servidor implements ManejadorDePaquetes, Runnable
                 try
                 {
                     input.read(paquete);
-                    s.close();
+                    //s.close();
                 }
                 catch (IOException e)
                 {
@@ -158,11 +159,11 @@ public class Servidor implements ManejadorDePaquetes, Runnable
                 
                 pv = new PaqueteVecino(tipoPaquete, paquete);
                 
-                procesarSolicitudDeDesconexion(pv);
+                procesarSolicitudDeDesconexion(pv, s);
                 
                 break;
                 
-            case CONFIRMACION_DE_DESCONEXION:
+            /*case CONFIRMACION_DE_DESCONEXION:
                 paquete = new byte[10];
                 
                 try
@@ -183,7 +184,7 @@ public class Servidor implements ManejadorDePaquetes, Runnable
                     sRespuestaDesconexion.release();
                 }
                     
-                break;
+                break;*/
                 
             case PAQUETE_DE_ALCANZABILIDAD:
                 try
@@ -228,7 +229,7 @@ public class Servidor implements ManejadorDePaquetes, Runnable
             conexion = new Socket(ipV, Router.PUERTO_ENTRADA);
             output = conexion.getOutputStream();
             output.write(paqueteParaEnviar.getBytes());
-            conexion.close();
+            //conexion.close();
         }
         catch (IOException e)
         {
@@ -236,7 +237,32 @@ public class Servidor implements ManejadorDePaquetes, Runnable
         }
         
         // Esperamos 5 segundos por la respuesta.
-        boolean respuesta = false;
+        conexion.setSoTimeout(5000);
+        InputStream input;
+        byte[] respuesta = new byte[11];
+        try
+        {
+            input = conexion.getInputStream();
+            input.read(respuesta);
+        }
+        catch (SocketTimeoutException e) // Si no hubo respuesta, le avisamos al usuario.
+        {
+            return false;
+        }
+        catch (IOException e)
+        {
+            throw new IOException("Error al recibir paquete de confirmación.");
+        }
+        finally
+        {
+            conexion.close();
+        }
+        
+        PaqueteVecino pv = new PaqueteVecino(Paquete_t.CONEXION_ACEPTADA, Arrays.copyOfRange(respuesta, 1, 11));
+        
+        vecinos.addVecino(pv, true);
+        
+        /*boolean respuesta = false;
         try
         {
             esperando = ipV;
@@ -245,14 +271,14 @@ public class Servidor implements ManejadorDePaquetes, Runnable
         catch (InterruptedException e)
         {
             throw new RuntimeException("El hilo correspondiente a la interfaz gráfica fue interrumpido (esto no debería ocurrir).");
-        }
+        }*/
         
-        // Le avisamos al usuario si llegó una respuesta o no.
-        return respuesta;
+        // Le avisamos al usuario que sí llegó una respuesta.
+        return true;
     }
     
     /*Para cuando llega la solicitud de otro router.*/
-    private void procesarSolicitudDeNuevoVecino(PaqueteVecino pv)
+    private void procesarSolicitudDeNuevoVecino(PaqueteVecino pv, Socket s)
     {
         // Se agrega a la tabla de vecinos.
         vecinos.addVecino(pv, false);
@@ -266,11 +292,11 @@ public class Servidor implements ManejadorDePaquetes, Runnable
         PaqueteVecino respuesta = new PaqueteVecino(Paquete_t.CONEXION_ACEPTADA, this.direccion, this.mascara, this.numAS);
         
         // Nos conectamos con el vecino nuevo y le enviamos el paquete.
-        Socket s;
+        //Socket s;
         OutputStream output;
         try
         {
-            s = new Socket(pv.getIP(), Router.PUERTO_ENTRADA);
+            //s = new Socket(pv.getIP(), Router.PUERTO_ENTRADA);
             output = s.getOutputStream();
             output.write(respuesta.getBytes());
             s.close();
@@ -346,17 +372,17 @@ public class Servidor implements ManejadorDePaquetes, Runnable
     }
     
     /*Para cuando llega la solicitud de otro router.*/
-    private void procesarSolicitudDeDesconexion(PaqueteVecino pv)
+    private void procesarSolicitudDeDesconexion(PaqueteVecino pv, Socket s)
     {
         // Armamos el paquete de confirmación.
         PaqueteVecino respuesta = new PaqueteVecino(Paquete_t.CONFIRMACION_DE_DESCONEXION, this.direccion, this.mascara, this.numAS);
         
         // Nos conectamos con el vecino nuevo y le enviamos el paquete.
-        Socket s;
+        //Socket s;
         OutputStream output;
         try
         {
-            s = new Socket(pv.getIP(), Router.PUERTO_ENTRADA);
+            //s = new Socket(pv.getIP(), Router.PUERTO_ENTRADA);
             output = s.getOutputStream();
             output.write(respuesta.getBytes());
             s.close();

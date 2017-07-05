@@ -2,17 +2,21 @@ import java.util.Scanner;
 import java.net.*;
 
 /**
- * Write a description of class Interfaz here.
+ * FALTA:   Necesita tener acceso al hilo de alcanzabilidad para
+ *              poder interrumpirlo y que este envíe la info de
+ *              alcanzabilidad antes de tiempo.
+ *          Tiene que acceder a la tabla de hilos para poder
+ *              interrumpir uno y pedirle que elimine la conexión
+ *              con el vecino.
+ *          Falta controlcar bien las excepciones.
+ *          Buscar cómo formatear bonito las tablas.
+ *          Casi todo hay que cambiarlo aquí dentro.
  * 
  * @author (your name) 
  * @version (a version number or a date)
  */
 public class InterfazDeOperador implements Runnable
-{
-    // TODO: Falta controlar bien todas las excepciones.
-    
-    // TODO: Buscar cómo formatear bonito las tablas.
-    
+{   
     Scanner s = new Scanner(System.in);
     
     private static final String ayuda =
