@@ -22,6 +22,7 @@ public class Router
     /** Todavía no estoy seguro de si hay que quitar esta constante de acá. **/
     // constante
     public static final int PUERTO_ENTRADA = 57809;
+    
 	public static InetAddress ipLocal;
 	public static InetAddress mascaraLocal;
 	public static NumeroAS numASLocal;
@@ -33,11 +34,7 @@ public class Router
     public static Hashtable<InetAddress, Thread> hilosActivos;
     
     public static Thread hiloAlcanzabilidad;
-    
-    public static InetAddress ipLocal;
-    public static InetAddress mascaraLocal;
-    public static NumeroAS numASLocal;
-    
+   
     
     public static int main()
     {
@@ -121,5 +118,28 @@ public class Router
             }
         }
         return result;
+    }
+    
+    public static void agregarNuevoDestino(String ipD, String mascaraD) throws IllegalArgumentException
+    {
+     
+        InetAddress ipDestino;
+        InetAddress mascaraDestino;
+        try
+        {
+             ipDestino = InetAddress.getByName(ipD);
+             mascaraDestino = InetAddress.getByName(mascaraD);
+        }
+        catch (UnknownHostException e)
+        {
+            throw new IllegalArgumentException("Dirección IP de destino inválida.");
+        }
+        
+        Destino d = new Destino(ipDestino, mascaraDestino);
+        
+        for (int i = 2; i < params.length; i++)
+            d.addAS(new NumeroAS(params[i]));
+            
+        alcanzabilidad.addDestino(d);
     }
 }
