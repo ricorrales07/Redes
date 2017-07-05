@@ -22,11 +22,19 @@ public class Router
     /** Todavía no estoy seguro de si hay que quitar esta constante de acá. **/
     // constante
     public static final int PUERTO_ENTRADA = 57809;
+    
     private static ServerSocket sSocket;
     private static InterfazDeOperador interfaz;
+    
     public static Hashtable<InetAddress,Queue<Integer>> memoriaCompartida;
-    private static Hashtable<InetAddress, Thread> hilosActivos;
+    public static Hashtable<InetAddress, Thread> hilosActivos;
+    
     public static Thread hiloAlcanzabilidad;
+    
+    public static InetAddress ipLocal;
+    public static InetAddress mascaraLocal;
+    public static NumeroAS numASLocal;
+    
     
     public static int main()
     {
@@ -43,12 +51,14 @@ public class Router
             return 1;
         }
         
-        while (server == null)
+        while (ipLocal == null || mascaraLocal == null || numASLocal == null )
         {
             try
             {
                 String[] s = interfaz.inicializar();
-                server = new Servidor(s[0], s[1], s[2]);
+                ipLocal = InetAddress.getByName(s[0]);
+                mascaraLocal = InetAddress.getByName(s[1]);
+                numASLocal = new NumeroAS(s[2]);
             }
             catch (Exception e)
             {
@@ -87,7 +97,7 @@ public class Router
             
             if (tipo == Paquete_t.SOLICITUD_DE_CONEXION)
             {
-                Thread t = new Thread(new Conexion(ss, false));
+                Thread t = new Thread(new Conexion(ss));
                 t.start();
             }
         }
