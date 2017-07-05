@@ -20,14 +20,10 @@ import java.io.*;
  * @version (a version number or a date)
  */
 public class Conexion implements Runnable
-{
-    private InetAddress direccion;
-    private InetAddress mascara;
-    private NumeroAS numAS;
-    
+{   
     private Socket s;
     private InputStream input;
-    private InputStream output;
+    private OutputStream output;
     private InetAddress ipVecino;
     private InetAddress mascaraVecino;
     private NumeroAS asVecino;
@@ -36,12 +32,43 @@ public class Conexion implements Runnable
     private TablaAlcanzabilidad alcanzabilidad;
     
     // Para usar por vía manual.
-    public Conexion(InetAddress ip)
+    public Conexion(InetAddress ip, InetAddress mascara) throws IOException // ¿Necesita la máscara?
     {
+		ipVecino = ip;
+		
         // Nuevo socket, establecer conexión con vecino nuevo.
+        try
+        {
+            s = new Socket(ip, Router.PUERTO_ENTRADA);
+        }
+        catch(IOException e)
+        {
+            throw new IOException("No se pudo establecer conexión con el vecino.");
+        }
+        
         // Inicializar input, output, tablas.
+        try
+        {
+            input = s.getInputStream();
+            output = s.getOutputStream();
+            vecinos = TablaVecinos.getTabla();
+            alcanzabilidad = TablaAlcanzabilidad.getTabla();
+        }
+        catch (IOException e)
+        {
+            throw new IOException("Imposible obtener tablas de vecinos y alcanzabilidad.");
+        }
+        
         // Solicitar conexión con vecino (método aparte).
         // Si no exitosa, tirar excepción.
+		try
+		{
+			solicitarConexion();
+		}
+		catch(IOException e)
+		{
+			throw new IOException("No fue posible enviar paquete de solicitud de conexión.");
+		}
     }
     
     // Para usar por vía no manual.
@@ -61,6 +88,7 @@ public class Conexion implements Runnable
         }
         
         // Procesar acá la solicitud de nuevo vecino.
+		procesarSolicitudDeNuevoVecino();
     }
     
     public void run()
@@ -95,6 +123,25 @@ public class Conexion implements Runnable
                 return;
             }
         }
+    }
+    
+    private void solicitarConexion() throws IOException
+    {
+        // Armamos el paquete que vamos a enviar.
+        PaqueteVecino paqueteParaEnviar = new PaqueteVecino(Paquete_t.SOLICITUD_DE_CONEXION, Router.ipLocal, Router.mascaraLocal, Router.numASLocal);
+        
+        // Le enviamos el mensaje al otro Router.
+        output.write(paqueteParaEnviar.getBytes());
+        
+        // Esperamos 5 segundos por la respuesta.
+        s.setSoTimeout(5000);
+        byte[] respuesta = new byte[11];
+        input.read(respuesta);
+		s.setSoTimeout(0);
+        
+        PaqueteVecino pv = new PaqueteVecino(Paquete_t.CONEXION_ACEPTADA, Arrays.copyOfRange(respuesta, 1, 11));
+        
+        vecinos.addVecino(pv, true);
     }
     
     /*Para cuando llega la solicitud de otro router.*/
@@ -136,7 +183,140 @@ public class Conexion implements Runnable
         }
     }
     
-    private boolean manejarPaquete(Paquete_t tipoPaquete) throws IOException
+    private void cerrarConexion() throws IOException
+	{
+        // Lo sacamos de la tabla, puesto que no importa si responde o no.
+        vecinos.removeVecino(ipVecino);
+        
+		// Borramos todos los destinos que eran alcanzables a través de este vecino.
+        // TODO: Implementar este método.
+		TablaAlcanzabilidad.getTabla().removeAll(ipVecino);
+        
+        // Armamos el paquete que vamos a enviar.
+        PaqueteVecino paqueteParaEnviar = new PaqueteVecino(Paquete_t.SOLICITUD_DE_DESCONEXION, Router.ipLocal, Router.mascaraLocal, Router.numASLocal);
+        
+        // Enviamos el mensaje.
+        try
+        {
+            output.write(paqueteParaEnviar.getBytes());
+        }
+        catch (IOException e)
+        {
+            throw new IOException("No se pudo enviar la solicitud de cierre de conexión. C");
+        }
+        
+        // Esperamos 5 segundos por la respuesta.
+        s.setSoTimeout(5000);
+        byte[] respuesta = new byte[11];
+		try
+		{
+			input.read(respuesta);
+			s.close();
+		}
+		catch (SocketTimeoutException e)
+		{
+			syncrhonized(System.out)
+			{
+				System.out.println("No se recibió confirmación de desconexión. Conexión cerrada de todas maneras.");
+			}
+		}
+		s.setSoTimeout(0);
+	}
+	
+	private void procesarSolicitudDeDesconexion()
+	{
+		// Lee el paquete.      
+        try
+        {
+            input.skip(10);
+        }
+        catch (IOException e)
+        {
+            throw new IOException("Error al recibir paquete.");
+        }
+		
+		// Armamos el paquete de confirmación.
+        PaqueteVecino respuesta = new PaqueteVecino(Paquete_t.CONFIRMACION_DE_DESCONEXION, Router.ipLocal, Router.mascaraLocal, Router.numASLocal);
+        
+        // Le enviamos el paquete al vecino.
+        try
+        {
+            output.write(respuesta.getBytes());
+            s.close();
+        }
+        catch (IOException e)
+        {
+			synchronized(System.out)
+			{
+				System.out.println("No se pudo enviar confirmación de desconexión a IP " + pv.getIP().getHostAddress() + ".");
+			}
+        }
+        
+        // Se borra de la tabla de vecinos.
+        vecinos.removeVecino(pv.getIP(), false, pv.getIP());
+        
+        // Borramos todos los destinos que eran alcanzables a través de este vecino.
+        // TODO: Implementar este método.
+		TablaAlcanzabilidad.getTabla().removeAll(ipVecino);
+	}
+	
+	private void procesarPaqueteDeAlcanzabilidad() throws IOException
+    {
+        NumeroAS origen;
+        byte[] ASorigen = new byte[2];
+        byte[] numDestinos = new byte[4];
+        
+        input.read(ASorigen);
+        input.read(numDestinos);
+        try
+        {
+            origen = new NumeroAS(ASorigen);
+        }
+        catch(IllegalArgumentException e)
+        {
+            throw new RuntimeException("Error en el paquete de alcanzabilidad (no debería ocurrir).");
+        }
+        
+        int nDestinos = ByteBuffer.wrap(numDestinos).getInt();
+        
+        PaqueteAlcanzabilidad pa = new PaqueteAlcanzabilidad(origen);
+        
+        for (int i = 0; i < nDestinos; i++)
+        {
+            byte[] headerDestino = new byte[8];
+            input.read(headerDestino);
+            Destino d = new Destino(headerDestino, ipVecino);
+            
+            byte[] cantAS = new byte[2];
+            input.read(cantAS);
+            short cAS = ByteBuffer.wrap(cantAS).getShort();
+            
+            Destino dAnterior = alcanzabilidad.getDestino(d.getIP());
+            if(cAS + 1 > dAnterior.getLongRuta())
+            {
+                input.skip(cAS * 2);
+                continue;
+            }
+            
+            d.addAS(origen);
+            
+            for (int j = 0; j < cAS; j++)
+            {
+                byte[] as = new byte[2];
+                input.read(as);
+                d.addAS(new NumeroAS(as));
+            }
+            
+            pa.addDestino(d);
+        }
+        
+        List<Destino> nuevosDestinos = pa.getListaDestinos();
+        
+        for (Destino d : nuevosDestinos)
+            alcanzabilidad.addDestino(d, false, ipVecino);
+    }
+	
+	private void manejarPaquete(Paquete_t tipoPaquete) throws IOException
     {
         byte[] paquete;
         PaqueteVecino pv;
