@@ -1,7 +1,8 @@
 import java.net.*;
 import java.lang.Thread;
 import java.io.*;
-
+import java.util.Queue; 
+import java.util.Hashtable;
 // <>
 
 /**
@@ -21,9 +22,11 @@ public class Router
     /** Todavía no estoy seguro de si hay que quitar esta constante de acá. **/
     // constante
     public static final int PUERTO_ENTRADA = 57809;
-    
     private static ServerSocket sSocket;
     private static InterfazDeOperador interfaz;
+    public static Hashtable<InetAddress,Queue<Integer>> memoriaCompartida;
+    private static Hashtable<InetAddress, Thread> hilosActivos;
+    public static Thread hiloAlcanzabilidad;
     
     public static int main()
     {
@@ -62,8 +65,8 @@ public class Router
         i.start();
         
         // Un hilo para enviar información de alcanzabilidad.
-        HiloAlcanzabilidad h = new Thread(new HiloAlcanzabilidad());
-        h.start();
+        hiloAlcanzabilidad = new Thread(new HiloAlcanzabilidad());
+        hiloAlcanzabilidad.start();
         
         while (true)
         {
