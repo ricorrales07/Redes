@@ -1,5 +1,7 @@
 import java.util.Hashtable;
 import java.net.*;
+import java.util.Queue;
+
 /**
  * Esta clase se encarga de transmitir la información de alcanzabilidad cada
  *      30 segundos. Para eso, tiene que interrumpir a todos los demás hilos
@@ -41,11 +43,11 @@ public class HiloAlcanzabilidad implements Runnable
     private void enviar(){
       synchronized(Router.memoriaCompartida)
         {
-            for(Queue cola : memoriaCompartida.values()){
+            for(Queue cola : Router.memoriaCompartida.values()){
                 cola.add(5);       
             }
             synchronized(Router.hilosActivos){
-                for(Thread hiloActivo : hilosActivos.values())
+                for(Thread hiloActivo : Router.hilosActivos.values())
                 {
                    hiloActivo.interrupt();
                 } 
