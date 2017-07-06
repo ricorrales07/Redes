@@ -193,7 +193,7 @@ public class Conexion implements Runnable
         alcanzabilidad.addDestino(d, false, pv.getIP());
         
         // Armamos el paquete de confirmación.
-        PaqueteVecino respuesta = new PaqueteVecino(Paquete_t.CONEXION_ACEPTADA, ipVecino, mascaraVecino, asVecino);
+        PaqueteVecino respuesta = new PaqueteVecino(Paquete_t.CONEXION_ACEPTADA, Router.ipLocal, Router.mascaraLocal, Router.numASLocal);
         
         // Le enviamos el paquete al vecino.
         try
