@@ -43,6 +43,7 @@ public class HiloAlcanzabilidad implements Runnable
     private void enviar(){
       synchronized(Router.hilosActivos)
         {
+            System.out.println("Enviando info alcanzabilidad");
             for(Queue cola : Router.memoriaCompartida.values()){
                 cola.add(5);       
             }
