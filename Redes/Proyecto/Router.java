@@ -22,20 +22,25 @@ public class Router
     /** Todavía no estoy seguro de si hay que quitar esta constante de acá. **/
     // constante
     public static final int PUERTO_ENTRADA = 57809;
-	public static NumeroAS numASLocal;
+    
+    public static InetAddress ipLocal;
+    public static InetAddress mascaraLocal;
+    public static NumeroAS numASLocal;
     
     private static ServerSocket sSocket;
     private static InterfazDeOperador interfaz;
     
+    // ESTOS DOS DEBERÍAN COMPARTIR UN LOCK! PODEMOS TENER PROBLEMAS DE DEADLOCKS!!!
     public static Hashtable<InetAddress,Queue<Integer>> memoriaCompartida;
     public static Hashtable<InetAddress, Thread> hilosActivos;
     
     public static Thread hiloAlcanzabilidad;
     
-    
     public static int main()
     {
         interfaz = new InterfazDeOperador();
+        memoriaCompartida = new Hashtable<InetAddress,Queue<Integer>>();
+        hilosActivos = new Hashtable<InetAddress, Thread>();
         
         try
         {
@@ -115,5 +120,36 @@ public class Router
             }
         }
         return result;
+    }
+    
+    public static void agregarNuevoDestino(String[] params) throws IllegalArgumentException
+    {
+        InetAddress ipDestino;
+        InetAddress mascaraDestino;
+        try
+        {
+             ipDestino = InetAddress.getByName(params[0]);
+             mascaraDestino = InetAddress.getByName(params[1]);
+        }
+        catch (UnknownHostException e)
+        {
+            throw new IllegalArgumentException("Dirección IP de destino inválida.");
+        }
+        
+        Destino d = new Destino(ipDestino, mascaraDestino, InetAddress.getLoopbackAddress());
+        
+        for (int i = 2; i < params.length; i++)
+            d.addAS(new NumeroAS(params[i]));
+        try
+        {
+            TablaAlcanzabilidad.getTabla().addDestino(d);
+        }
+        catch(IOException e)
+        {
+            synchronized(System.out)
+            {
+                System.out.println(e.getMessage());
+            }
+        }
     }
 }

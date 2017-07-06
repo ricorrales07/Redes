@@ -34,15 +34,33 @@ public class Conexion implements Runnable
     private TablaVecinos vecinos;
     private TablaAlcanzabilidad alcanzabilidad;
     
-    // Para usar por vía manual.
-    public Conexion(InetAddress ip, InetAddress mascara) throws IOException // ¿Necesita la máscara?
+    public InetAddress getIPVecino()
     {
-        ipVecino = ip;
+        return ipVecino;
+    }
+    
+    public InetAddress getMascaraVecino()
+    {
+        return mascaraVecino;
+    }
+    
+    // Para usar por vía manual.
+    public Conexion(String ipV, String mascaraV) throws IOException, IllegalArgumentException // ¿Necesita la máscara?
+    {
+        try
+        {
+            ipVecino = InetAddress.getByName(ipV);
+            mascaraVecino = InetAddress.getByName(mascaraV);
+        }
+        catch(UnknownHostException e)
+        {
+            throw new IllegalArgumentException("Dirección IP o máscara de red inválidas.");
+        }
         
         // Nuevo socket, establecer conexión con vecino nuevo.
         try
         {
-            s = new Socket(ip, Router.PUERTO_ENTRADA);
+            s = new Socket(ipVecino, Router.PUERTO_ENTRADA);
         }
         catch(IOException e)
         {
@@ -72,6 +90,8 @@ public class Conexion implements Runnable
         {
             throw new IOException("No fue posible enviar paquete de solicitud de conexión.");
         }
+        
+        
     }
     
     // Para usar por vía no manual.
@@ -160,6 +180,10 @@ public class Conexion implements Runnable
         // Lo mete en un objeto para manejarlo maś fácil.
         PaqueteVecino pv = new PaqueteVecino(Paquete_t.SOLICITUD_DE_CONEXION, paquete);
         
+        ipVecino = pv.getIP();
+        mascaraVecino = pv.getMascara();
+        asVecino = pv.getAS();
+        
         // Se agrega a la tabla de vecinos.
         vecinos.addVecino(pv, false);
         
@@ -222,7 +246,7 @@ public class Conexion implements Runnable
         s.setSoTimeout(0);
     }
     
-    private void procesarSolicitudDeDesconexion()
+    private void procesarSolicitudDeDesconexion() throws IOException
     {
         // Lee el paquete.      
         try
@@ -335,6 +359,7 @@ public class Conexion implements Runnable
                 return true;
                 
             default:
+                return true;
         }
     }
 }
