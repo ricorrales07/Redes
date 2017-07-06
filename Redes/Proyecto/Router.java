@@ -3,6 +3,7 @@ import java.lang.Thread;
 import java.io.*;
 import java.util.Queue; 
 import java.util.Hashtable;
+import java.util.concurrent.ConcurrentLinkedQueue;
 // <>
 
 /**
@@ -99,7 +100,13 @@ public class Router
             
             if (tipo == Paquete_t.SOLICITUD_DE_CONEXION)
             {
-                Thread t = new Thread(new Conexion(ss));
+                Conexion c = new Conexion(ss);
+                Thread t = new Thread(c);
+                synchronized(hilosActivos)
+                {
+                    hilosActivos.put(c.getIPVecino(), t);
+                    memoriaCompartida.put(c.getIPVecino(), new ConcurrentLinkedQueue<Integer>());
+                }
                 t.start();
             }
         }

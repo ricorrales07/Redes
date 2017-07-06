@@ -85,15 +85,31 @@ public class InterfazDeOperador implements Runnable
             switch(comando[0])
             {
                 case "ayuda":
-                    System.out.println(ayuda);
+                    synchronized (System.out)
+                    {
+                        System.out.println(ayuda);
+                    }
                     break;
 
                 case "nvecino":
-                    System.out.println("Enviando solicitud de conexión a " + comando[1] + "...");
+                    
+                    if(comando.length < 2)
+                    {
+                        synchronized(System.out)
+                        {
+                            System.out.println("Error. Faltan parámetros.");
+                        }
+                        break;
+                    }
+                
                     Conexion c;
                     try
                     {
-                        c = new Conexion(comando[1], comando[2]);
+                        synchronized(System.out)
+                        {
+                            System.out.println("Enviando solicitud de conexión a " + comando[1] + "...");
+                        }
+                            c = new Conexion(comando[1], comando[2]);
                     }
                     catch(IllegalArgumentException e)
                     {
@@ -180,7 +196,7 @@ public class InterfazDeOperador implements Runnable
                 case "enviara": // Interrumpe el hilo de alcanzabilidad y envía la info antes de tiempo
                     synchronized(System.out)
                     {
-                        System.out.println("Interrumpiendo hilo de alcanzabilidad...");
+                        System.out.println("Enviando información de alcanzabilidad...");
                     }
                     Router.hiloAlcanzabilidad.interrupt();
                     synchronized(System.out)

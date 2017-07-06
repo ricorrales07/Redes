@@ -62,7 +62,7 @@ public class Conexion implements Runnable
         try
         {
             s = new Socket(ipVecino, Router.PUERTO_ENTRADA);
-            s.setSoTimeout(5000);
+            //s.setSoTimeout(5000);
         }
         catch(IOException e)
         {
@@ -104,7 +104,6 @@ public class Conexion implements Runnable
             output = s.getOutputStream();
             vecinos = TablaVecinos.getTabla();
             alcanzabilidad = TablaAlcanzabilidad.getTabla();
-			s.setSoTimeout(5000);
         }
         catch (IOException e)
         {
@@ -123,7 +122,7 @@ public class Conexion implements Runnable
             }
             return;
         }
-        
+        //s.setSoTimeout(5000);
     }
     
     public void run()
@@ -155,7 +154,7 @@ public class Conexion implements Runnable
                         }
                         else
                         {
-                            System.out.println("Enviando info alcanzabilidad a " + ipVecino.getHostAddress()); 
+                            //System.out.println("Enviando info alcanzabilidad a " + ipVecino.getHostAddress()); 
                             
                             PaqueteAlcanzabilidad paquete = new PaqueteAlcanzabilidad(Router.numASLocal);
                              for (Destino d : alcanzabilidad.getAllDestinos())
@@ -183,6 +182,14 @@ public class Conexion implements Runnable
                 if (!manejarPaquete(tipo))
                     return;
             }
+            catch(ArrayIndexOutOfBoundsException e)
+            {
+                continue;
+            }
+            catch(SocketTimeoutException e)
+            {
+                continue;
+            }
             catch(IOException e)
             {
                 synchronized(System.out)
@@ -202,10 +209,10 @@ public class Conexion implements Runnable
         output.write(paqueteParaEnviar.getBytes());
         
         // Esperamos 5 segundos por la respuesta.
-        //s.setSoTimeout(5000);
+        s.setSoTimeout(5000);
         byte[] respuesta = new byte[11];
         input.read(respuesta);
-        //s.setSoTimeout(0);
+        s.setSoTimeout(0);
         
         PaqueteVecino pv = new PaqueteVecino(Paquete_t.CONEXION_ACEPTADA, Arrays.copyOfRange(respuesta, 1, 11));
         
@@ -273,7 +280,7 @@ public class Conexion implements Runnable
         }
         
         // Esperamos 5 segundos por la respuesta.
-        //s.setSoTimeout(5000);
+        s.setSoTimeout(5000);
         byte[] respuesta = new byte[11];
         try
         {
@@ -287,7 +294,7 @@ public class Conexion implements Runnable
                 System.out.println("No se recibió confirmación de desconexión. Conexión cerrada de todas maneras.");
             }
         }
-        //s.setSoTimeout(0);
+        s.setSoTimeout(0);
     }
     
     private void procesarSolicitudDeDesconexion() throws IOException
@@ -320,7 +327,7 @@ public class Conexion implements Runnable
         }
         
         // Se borra de la tabla de vecinos.
-        vecinos.removeVecino(respuesta.getIP(), false, respuesta.getIP());
+        vecinos.removeVecino(ipVecino, false, ipVecino);
         
         // Borramos todos los destinos que eran alcanzables a través de este vecino.
         // TODO: Implementar este método.
@@ -399,7 +406,7 @@ public class Conexion implements Runnable
                 return false;
                 
             case PAQUETE_DE_ALCANZABILIDAD:
-                System.out.println("Recibida info de alcanzabilidad de " + ipVecino.getHostAddress());
+                //System.out.println("Recibida info de alcanzabilidad de " + ipVecino.getHostAddress());
                 procesarPaqueteDeAlcanzabilidad();
                 return true;
                 
