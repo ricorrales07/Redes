@@ -22,9 +22,7 @@ public class Router
     /** Todavía no estoy seguro de si hay que quitar esta constante de acá. **/
     // constante
     public static final int PUERTO_ENTRADA = 57809;
-    public static InetAddress ipLocal;
-    public static InetAddress mascaraLocal;
-    public static NumeroAS numASLocal;
+	public static NumeroAS numASLocal;
     
     private static ServerSocket sSocket;
     private static InterfazDeOperador interfaz;
