@@ -3,6 +3,7 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Queue;
 
 /**
  * Esta clase representa una conexión con un vecino.
@@ -128,6 +129,55 @@ public class Conexion implements Runnable
     {
         while (true)
         {
+            if(Thread.interrupted())
+            {
+                synchronized(Router.hilosActivos)
+                {
+                    Queue<Integer> q = Router.memoriaCompartida.get(ipVecino);
+                    while(!q.isEmpty())
+                    {
+                        Integer comando = q.poll();
+                        if (comando.equals(0))
+                        {
+                            try
+                            {
+                                cerrarConexion();
+                                return;
+                            }
+                            catch (IOException e)
+                            {
+                                synchronized(System.out)
+                                {
+                                    System.out.println(e.getMessage());
+                                }
+                            }
+                        }
+                        else
+                        {
+                             PaqueteAlcanzabilidad paquete = new PaqueteAlcanzabilidad(Router.numASLocal);
+                             for (Destino d : alcanzabilidad.getAllDestinos())
+                                 paquete.addDestino(d);
+                             
+                             for (InetAddress ip : vecinos.getListaIPs())
+                             {
+                                 try
+                                 {
+                                     Socket s = new Socket(ip, Router.PUERTO_ENTRADA);
+                                     OutputStream output = s.getOutputStream();
+                      
+                                     output.write(paquete.getBytes());
+                                     s.close();
+                                 }
+                                 catch (IOException e)
+                                 {
+                                     System.out.println("Error al conectar con el vecino " + ip.getHostAddress() + ".");
+                                     continue;
+                                 }
+                             }
+                        }
+                    }
+                }
+            }
             try
             {
                 Paquete_t tipo = Paquete_t.values()[input.read()];
@@ -225,7 +275,7 @@ public class Conexion implements Runnable
         }
         catch (IOException e)
         {
-            throw new IOException("No se pudo enviar la solicitud de cierre de conexión. C");
+            throw new IOException("No se pudo enviar la solicitud de cierre de conexión.");
         }
         
         // Esperamos 5 segundos por la respuesta.
@@ -315,7 +365,7 @@ public class Conexion implements Runnable
             short cAS = ByteBuffer.wrap(cantAS).getShort();
             
             Destino dAnterior = alcanzabilidad.getDestino(d.getIP());
-            if(cAS + 1 > dAnterior.getLongRuta())
+            if(dAnterior != null && cAS + 1 > dAnterior.getLongRuta())
             {
                 input.skip(cAS * 2);
                 continue;

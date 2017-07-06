@@ -41,17 +41,15 @@ public class HiloAlcanzabilidad implements Runnable
     }
     
     private void enviar(){
-      synchronized(Router.memoriaCompartida)
+      synchronized(Router.hilosActivos)
         {
             for(Queue cola : Router.memoriaCompartida.values()){
                 cola.add(5);       
             }
-            synchronized(Router.hilosActivos){
                 for(Thread hiloActivo : Router.hilosActivos.values())
                 {
                    hiloActivo.interrupt();
                 } 
-             } 
         }
     }
 }
