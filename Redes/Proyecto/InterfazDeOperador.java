@@ -53,7 +53,7 @@ public class InterfazDeOperador implements Runnable
         {
             try
             {
-                Router.server.agregarNuevoDestino(input);
+                Router.agregarNuevoDestino(input);
             }
             catch(IllegalArgumentException e)
             {
