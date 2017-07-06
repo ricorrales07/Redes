@@ -82,130 +82,131 @@ public class InterfazDeOperador implements Runnable
             input = s.nextLine();
 
             String[] comando = input.split(" ");
-            switch(comando[0])
+            try
             {
-                case "ayuda":
-                    synchronized (System.out)
-                    {
-                        System.out.println(ayuda);
-                    }
-                    break;
-
-                case "nvecino":
+                switch(comando[0])
+                {
+                    case "ayuda":
+                        synchronized (System.out)
+                        {
+                            System.out.println(ayuda);
+                        }
+                        break;
+    
+                    case "nvecino":
                     
-                    if(comando.length < 2)
-                    {
-                        synchronized(System.out)
+                        Conexion c;
+                        try
                         {
-                            System.out.println("Error. Faltan parámetros.");
-                        }
-                        break;
-                    }
-                
-                    Conexion c;
-                    try
-                    {
-                        synchronized(System.out)
-                        {
-                            System.out.println("Enviando solicitud de conexión a " + comando[1] + "...");
-                        }
-                            c = new Conexion(comando[1], comando[2]);
-                    }
-                    catch(IllegalArgumentException e)
-                    {
-                        synchronized(System.out)
-                        {
-                            System.out.println(e.getMessage());
-                        }
-                        break;
-                    }
-                    catch(IOException e)
-                    {
-                        synchronized(System.out)
-                        {
-                            System.out.println(e.getMessage());
-                        }
-                        break;
-                    }
-                    Thread t = new Thread(c);
-                    synchronized(Router.hilosActivos)
-                    {
-                        Router.hilosActivos.put(c.getIPVecino(), t);
-                        Router.memoriaCompartida.put(c.getIPVecino(), new ConcurrentLinkedQueue<Integer>());
-                    }
-                    t.start();
-                    synchronized(System.out)
-                    {
-                        System.out.println("Vecino agregado con éxito.");
-                    }
-                    break;
-
-                case "mostrar":
-                    switch(comando[1])
-                    {
-                        case "vecinos":
-                            try
+                            synchronized(System.out)
                             {
-                                System.out.println(TablaVecinos.getTabla().toString());
+                                System.out.println("Enviando solicitud de conexión a " + comando[1] + "...");
                             }
-                            catch(IOException e)
+                                c = new Conexion(comando[1], comando[2]);
+                        }
+                        catch(IllegalArgumentException e)
+                        {
+                            synchronized(System.out)
                             {
-                                synchronized(System.out)
-                                {
-                                    System.out.println(e.getMessage());
-                                }
+                                System.out.println(e.getMessage());
                             }
                             break;
-                        case "destinos":
-                            try
+                        }
+                        catch(IOException e)
+                        {
+                            synchronized(System.out)
                             {
-                                System.out.println(TablaAlcanzabilidad.getTabla().toString());
-                            }
-                            catch(IOException e)
-                            {
-                                synchronized(System.out)
-                                {
-                                    System.out.println(e.getMessage());
-                                }
+                                System.out.println(e.getMessage());
                             }
                             break;
-                    }
-                    break;
-
-                case "bvecino":
-                    InetAddress vecino;
-                    try
-                    {
-                        vecino = InetAddress.getByName(comando[1]);
-                    }
-                    catch (UnknownHostException e)
-                    {
+                        }
+                        Thread t = new Thread(c);
+                        synchronized(Router.hilosActivos)
+                        {
+                            Router.hilosActivos.put(c.getIPVecino(), t);
+                            Router.memoriaCompartida.put(c.getIPVecino(), new ConcurrentLinkedQueue<Integer>());
+                        }
+                        t.start();
                         synchronized(System.out)
                         {
-                            System.out.println("Dirección IP no válida.");
+                            System.out.println("Vecino agregado con éxito.");
                         }
                         break;
-                    }
-                    synchronized(Router.hilosActivos)
-                    {
-                        Router.memoriaCompartida.get(vecino).add(0);
-                        Router.hilosActivos.get(vecino).interrupt();
-                    }
-                    break;
-
-                case "enviara": // Interrumpe el hilo de alcanzabilidad y envía la info antes de tiempo
-                    synchronized(System.out)
-                    {
-                        System.out.println("Enviando información de alcanzabilidad...");
-                    }
-                    Router.hiloAlcanzabilidad.interrupt();
-                    synchronized(System.out)
-                    {
-                        System.out.println("Información de alcanzabilidad enviada.");
-                    }
-                    break;
-                case "salir":
-                    System.exit(0);
+    
+                    case "mostrar":
+                        switch(comando[1])
+                        {
+                            case "vecinos":
+                                try
+                                {
+                                    System.out.println(TablaVecinos.getTabla().toString());
+                                }
+                                catch(IOException e)
+                                {
+                                    synchronized(System.out)
+                                    {
+                                        System.out.println(e.getMessage());
+                                    }
+                                }
+                                break;
+                            case "destinos":
+                                try
+                                {
+                                    System.out.println(TablaAlcanzabilidad.getTabla().toString());
+                                }
+                                catch(IOException e)
+                                {
+                                    synchronized(System.out)
+                                    {
+                                        System.out.println(e.getMessage());
+                                    }
+                                }
+                                break;
+                        }
+                        break;
+    
+                    case "bvecino":
+                        InetAddress vecino;
+                        try
+                        {
+                            vecino = InetAddress.getByName(comando[1]);
+                        }
+                        catch (UnknownHostException e)
+                        {
+                            synchronized(System.out)
+                            {
+                                System.out.println("Dirección IP no válida.");
+                            }
+                            break;
+                        }
+                        synchronized(Router.hilosActivos)
+                        {
+                            Router.memoriaCompartida.get(vecino).add(0);
+                            Router.hilosActivos.get(vecino).interrupt();
+                        }
+                        break;
+    
+                    case "enviara": // Interrumpe el hilo de alcanzabilidad y envía la info antes de tiempo
+                        synchronized(System.out)
+                        {
+                            System.out.println("Enviando información de alcanzabilidad...");
+                        }
+                        Router.hiloAlcanzabilidad.interrupt();
+                        synchronized(System.out)
+                        {
+                            System.out.println("Información de alcanzabilidad enviada.");
+                        }
+                        break;
+                    case "salir":
+                        System.exit(0);
+                }
+            }
+            catch(Exception e)
+            {
+                synchronized(System.out)
+                {
+                    System.out.println("Error:" + e.getMessage());
+                }
             }
         }
     }

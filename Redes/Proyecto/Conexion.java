@@ -137,10 +137,12 @@ public class Conexion implements Runnable
                     while(!q.isEmpty())
                     {
                         Integer comando = q.poll();
+                        System.out.println("Comando: " + comando);
                         if (comando.equals(0))
                         {
                             try
                             {
+                                System.out.println("Cerrando conexión...");
                                 cerrarConexion();
                                 return;
                             }
@@ -148,7 +150,7 @@ public class Conexion implements Runnable
                             {
                                 synchronized(System.out)
                                 {
-                                    System.out.println(e.getMessage());
+                                    System.out.println("Error: " + e.getMessage());
                                 }
                             }
                         }
