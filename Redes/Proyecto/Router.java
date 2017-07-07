@@ -129,7 +129,7 @@ public class Router
         return result;
     }
     
-    public static void agregarNuevoDestino(String[] params) throws IllegalArgumentException
+    public static void agregarNuevoDestino(String[] params) throws IllegalArgumentException, IOException
     {
         InetAddress ipDestino;
         InetAddress mascaraDestino;
@@ -147,16 +147,6 @@ public class Router
         
         for (int i = 2; i < params.length; i++)
             d.addAS(new NumeroAS(params[i]));
-        try
-        {
-            TablaAlcanzabilidad.getTabla().addDestino(d);
-        }
-        catch(IOException e)
-        {
-            synchronized(System.out)
-            {
-                System.out.println(e.getMessage());
-            }
-        }
+        TablaAlcanzabilidad.getTabla().addDestino(d);
     }
 }

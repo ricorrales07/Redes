@@ -15,6 +15,7 @@ import java.util.Collection;
  */
 public class TablaAlcanzabilidad
 {
+    //TODO: cambiar a Hashtable de InetAddress con Set de Destino
     private Hashtable<InetAddress, Destino> tabla;
     private Logger registro;
     private FileHandler fHandler;
@@ -65,11 +66,6 @@ public class TablaAlcanzabilidad
     public synchronized Collection<Destino> getAllDestinos()
     {
         return tabla.values();
-    }
-    
-    public synchronized Destino getDestino(InetAddress ip)
-    {
-        return tabla.get(ip);
     }
     
     public synchronized String toString()
