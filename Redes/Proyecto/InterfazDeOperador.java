@@ -205,7 +205,7 @@ public class InterfazDeOperador implements Runnable
             {
                 synchronized(System.out)
                 {
-                    System.out.println("Error:" + e.getMessage());
+                    System.out.println("Error: " + e.toString());
                 }
             }
         }
