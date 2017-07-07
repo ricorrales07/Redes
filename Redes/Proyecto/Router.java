@@ -37,7 +37,7 @@ public class Router
     
     public static Thread hiloAlcanzabilidad;
     
-    public static int main()
+    public static void main(String[] args)
     {
         interfaz = new InterfazDeOperador();
         memoriaCompartida = new Hashtable<InetAddress,Queue<Integer>>();
@@ -51,7 +51,7 @@ public class Router
         catch (IOException e)
         {
             System.out.println("ERROR: No se pudo obtener el puerto " + PUERTO_ENTRADA + ". Abortando...");
-            return 1;
+            return;
         }
         
         while (ipLocal == null || mascaraLocal == null || numASLocal == null )
