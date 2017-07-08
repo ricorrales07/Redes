@@ -368,14 +368,7 @@ public class Conexion implements Runnable
             input.read(cantAS);
             short cAS = ByteBuffer.wrap(cantAS).getShort();
             
-            
-            //TODO: añadir siempre
-            /*Destino dAnterior = alcanzabilidad.getDestino(d.getIP());
-            if(dAnterior != null && cAS + 1 > dAnterior.getLongRuta())
-            {
-                input.skip(cAS * 2);
-                continue;
-            }*/
+            TablaAlcanzabilidad.getTabla().addDestino(d);
             
             d.addAS(origen);
             

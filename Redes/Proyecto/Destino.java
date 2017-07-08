@@ -90,7 +90,7 @@ public class Destino
     
     public String toString()
     {
-        String retornable = ip.getHostAddress() + "\t\t" + mascara.getHostAddress() + "\t\t" + ipSalida.getHostAddress() + "\t";
+        String retornable = ip.getHostAddress() + "\t\t" + mascara.getHostAddress() + "\t\t\t" + ipSalida.getHostAddress() + "\t";
         for(NumeroAS n : ruta)
             retornable += n.toString() + ", ";
         return retornable;
