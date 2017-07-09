@@ -138,12 +138,12 @@ public class Conexion implements Runnable
                     while(!q.isEmpty())
                     {
                         Integer comando = q.poll();
-                        System.out.println("Comando: " + comando);
+                        //System.out.println("Comando: " + comando);
                         if (comando.equals(0))
                         {
                             try
                             {
-                                System.out.println("Cerrando conexión...");
+                                //System.out.println("Cerrando conexión...");
                                 cerrarConexion();
                                 return;
                             }
@@ -215,7 +215,7 @@ public class Conexion implements Runnable
         vecinos.removeVecino(ipVecino, false, ipVecino);
         
         // Borramos todos los destinos que eran alcanzables a través de este vecino.
-        alcanzabilidad.removeAll(ipVecino);
+        alcanzabilidad.removeAll(ipVecino, false, ipVecino);
     }
     
     private void solicitarConexion() throws IOException
@@ -348,7 +348,7 @@ public class Conexion implements Runnable
         
         // Borramos todos los destinos que eran alcanzables a través de este vecino.
         // TODO: Implementar este método.
-        TablaAlcanzabilidad.getTabla().removeAll(ipVecino);
+        TablaAlcanzabilidad.getTabla().removeAll(ipVecino, false, ipVecino);
     }
     
     private void procesarPaqueteDeAlcanzabilidad() throws IOException

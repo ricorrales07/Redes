@@ -15,7 +15,6 @@ import java.util.Collection;
  */
 public class TablaAlcanzabilidad
 {
-    //TODO: cambiar a Hashtable de InetAddress con Set de Destino
     private Hashtable<InetAddress, Destino> tabla;
     private Logger registro;
     private FileHandler fHandler;
@@ -58,9 +57,29 @@ public class TablaAlcanzabilidad
             registro.log(Level.INFO, "Nuevo destino añadido a la tabla de alcanzabilidad (vía " + origen.getHostAddress()  + "): {0}", d.logInfo());
     }
     
-    public synchronized void removeDestino(InetAddress ip)
+    public synchronized void removeAll(InetAddress ipVecino, boolean manual, InetAddress origen) throws IllegalArgumentException
     {
-        tabla.remove(ip);
+        for (Destino d : tabla.values())
+            if (d.getIPSalida().equals(ipVecino)){
+                try
+                {
+                    Destino destinoEliminado = tabla.remove(d.getIPSalida());
+                    if (manual)
+                        registro.log(Level.INFO, "Vecino eliminado (vía manual): {0}", destinoEliminado.logInfo());
+                    else
+                        registro.log(Level.INFO, "Vecino eliminado (vía " + origen.getHostAddress() + "): {0}", destinoEliminado.logInfo());
+                }
+                catch (NullPointerException e)
+                {
+                    registro.warning("Se recibió un puntero nulo para eliminar");
+                    throw new IllegalArgumentException("Se recibió un puntero nulo para eliminar");
+                }
+            }
+    }
+    
+    public synchronized void removeAll(InetAddress ipVecino) throws IllegalArgumentException
+    {
+        removeAll(ipVecino, true, InetAddress.getLoopbackAddress());
     }
     
     public synchronized Collection<Destino> getAllDestinos()
@@ -77,11 +96,8 @@ public class TablaAlcanzabilidad
         return retornable;
     }
     
-    public synchronized void removeAll(InetAddress ip){
-        for (Destino v : tabla.values())
-            if (v.getIPSalida().equals(ip)){
-                tabla.remove(v.getIP());
-            }
+    public synchronized Destino getDestino(InetAddress ip)
+    {
+        return tabla.get(ip);
     }
-    
 }
