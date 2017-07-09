@@ -4,8 +4,6 @@ import java.net.*;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.ArrayList;
 
 // <>
 
@@ -17,7 +15,8 @@ import java.util.ArrayList;
  */
 public class TablaAlcanzabilidad
 {
-    private Hashtable<InetAddress, HashSet<Destino>> tabla;
+    //TODO: cambiar a Hashtable de InetAddress con Set de Destino
+    private Hashtable<InetAddress, Destino> tabla;
     private Logger registro;
     private FileHandler fHandler;
     private SimpleFormatter sFormatter;
@@ -35,7 +34,7 @@ public class TablaAlcanzabilidad
         registro.addHandler(fHandler);
         registro.setLevel(Level.INFO);
         
-        tabla = new Hashtable<InetAddress, HashSet<Destino>>();        
+        tabla = new Hashtable<InetAddress, Destino>();        
     }
     
     public static synchronized TablaAlcanzabilidad getTabla() throws IOException
@@ -52,49 +51,36 @@ public class TablaAlcanzabilidad
     
     public synchronized void addDestino(Destino d, boolean manual, InetAddress origen)
     {
-        InetAddress ip = d.getIP();
-        if (tabla.containsKey(ip))
-        {
-            tabla.get(ip).add(d);
-        }
-        else
-        {
-            HashSet<Destino> h = new HashSet<Destino>();
-            h.add(d);
-            tabla.put(ip, h);
-        }
+        tabla.put(d.getIP(), d);
         if (manual)
             registro.log(Level.INFO, "Nuevo destino añadido a la tabla de alcanzabilidad (vía manual): {0}", d.logInfo());
         else
             registro.log(Level.INFO, "Nuevo destino añadido a la tabla de alcanzabilidad (vía " + origen.getHostAddress()  + "): {0}", d.logInfo());
     }
     
-    /*public synchronized void removeDestino(InetAddress ip)
+    public synchronized void removeDestino(InetAddress ip)
     {
         tabla.remove(ip);
-    }*/
+    }
     
     public synchronized Collection<Destino> getAllDestinos()
     {
-        ArrayList<Destino> a = new ArrayList<Destino>();
-        for (HashSet<Destino> h : tabla.values())
-            a.addAll(h);
-        return a;
+        return tabla.values();
     }
     
     public synchronized String toString()
     {
         String retornable = "Dirección IP \t Máscara de red \t IP Salida \t Ruta \n";
-        Collection<Destino> tablaIterable = getAllDestinos();
+        Collection<Destino> tablaIterable = tabla.values();
         for (Destino v : tablaIterable)
             retornable += v.toString() + "\n";
         return retornable;
     }
     
     public synchronized void removeAll(InetAddress ip){
-        for (Destino v : getAllDestinos())
+        for (Destino v : tabla.values())
             if (v.getIPSalida().equals(ip)){
-                tabla.get(v.getIP()).remove(v);
+                tabla.remove(v.getIP());
             }
     }
     
