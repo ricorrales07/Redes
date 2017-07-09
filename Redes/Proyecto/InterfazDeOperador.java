@@ -34,7 +34,7 @@ public class InterfazDeOperador implements Runnable
         "| * forzar-envio : forzar envío de información de alcanzabilidad a vecinos.                                            |\n" +
         "| * salir : finaliza el programa.                                                                                      |\n";
 
-    public void imprimirSeguro(String x)
+    public static void imprimirSeguro(String x)
     {
         synchronized(System.out)
         {
@@ -170,14 +170,27 @@ public class InterfazDeOperador implements Runnable
                             imprimirSeguro("Dirección IP no válida.");
                             break;
                         }
+                        imprimirSeguro("Enviando solicitud de dexconexión");
                         synchronized(Router.hilosActivos)
                         {
                             Router.memoriaCompartida.get(vecino).add(0);
                             Router.hilosActivos.get(vecino).interrupt();
                         }
+                        imprimirSeguro("Solicitud de desconexión enviada.");
+                        break;
+                        
+                    case "ndestino":
+                        try
+                        {
+                            Router.agregarNuevoDestino(Arrays.copyOfRange(comando, 1, comando.length));
+                        }
+                        catch(IllegalArgumentException e)
+                        {
+                            imprimirSeguro(e.getMessage());
+                        }
                         break;
     
-                    case "enviara": // Interrumpe el hilo de alcanzabilidad y envía la info antes de tiempo
+                    case "forzar-envio": // Interrumpe el hilo de alcanzabilidad y envía la info antes de tiempo
                         imprimirSeguro("Enviando información de alcanzabilidad...");
                         Router.hiloAlcanzabilidad.interrupt();
                         imprimirSeguro("Información de alcanzabilidad enviada.");

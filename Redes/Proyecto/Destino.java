@@ -95,4 +95,38 @@ public class Destino
             retornable += n.toString() + ", ";
         return retornable;
     }
+    
+    @Override 
+    public boolean equals(Object obj) 
+    { 
+        if (obj == this) 
+        { 
+            return true; 
+        } 
+        if (obj == null || obj.getClass() != this.getClass()) 
+        { 
+            return false; 
+        } 
+        Destino d = (Destino) obj;
+        if (d.ruta.size() != this.ruta.size())
+            return false;
+        for (int i = 0; i < ruta.size(); i++)
+            if(!d.ruta.get(i).equals(this.ruta.get(i)))
+                return false;
+        return ip.equals(d.ip) && mascara.equals(d.mascara) && ipSalida.equals(d.ipSalida);
+    } 
+        
+    @Override 
+    public int hashCode() 
+    { 
+        final int prime = 31; 
+        int result = 1; 
+        result = prime * result + ip.hashCode(); 
+        result = prime * result + mascara.hashCode(); 
+        result = prime * result + ipSalida.hashCode();
+        for (NumeroAS n : ruta)
+            result = prime * result + n.hashCode();
+        return result; 
+    }
+
 }

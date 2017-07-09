@@ -160,21 +160,21 @@ public class Conexion implements Runnable
                             //System.out.println("Enviando info alcanzabilidad a " + ipVecino.getHostAddress()); 
                             
                             PaqueteAlcanzabilidad paquete = new PaqueteAlcanzabilidad(Router.numASLocal);
-                             for (Destino d : alcanzabilidad.getAllDestinos())
-                                 paquete.addDestino(d);
+                            for (Destino d : alcanzabilidad.getAllDestinos())
+                                paquete.addDestino(d);
                              
-                             for (InetAddress ip : vecinos.getListaIPs())
-                             {
-                                 try
-                                 {
-                                     output.write(paquete.getBytes());
-                                 }
-                                 catch (IOException e)
-                                 {
-                                     System.out.println("Error al conectar con el vecino " + ip.getHostAddress() + ".");
-                                     continue;
-                                 }
-                             }
+                            for (InetAddress ip : vecinos.getListaIPs())
+                            {
+                                try
+                                {
+                                    output.write(paquete.getBytes());
+                                }
+                                catch (IOException e)
+                                {
+                                    System.out.println("Error al conectar con el vecino " + ip.getHostAddress() + ".");
+                                    continue;
+                                }
+                            }
                         }
                     }
                 }
@@ -193,6 +193,12 @@ public class Conexion implements Runnable
             {
                 continue;
             }
+            catch (SocketException e)
+            {
+                InterfazDeOperador.imprimirSeguro("Cierre inesperado de conexión con " + ipVecino.getHostAddress() + ".");
+                manejarCierreInesperado();
+                return;
+            }
             catch(IOException e)
             {
                 synchronized(System.out)
@@ -201,6 +207,15 @@ public class Conexion implements Runnable
                 }
             }
         }
+    }
+    
+    private void manejarCierreInesperado()
+    {
+        // Lo sacamos de la tabla, puesto que no importa si responde o no.
+        vecinos.removeVecino(ipVecino, false, ipVecino);
+        
+        // Borramos todos los destinos que eran alcanzables a través de este vecino.
+        alcanzabilidad.removeAll(ipVecino);
     }
     
     private void solicitarConexion() throws IOException
@@ -266,7 +281,6 @@ public class Conexion implements Runnable
         vecinos.removeVecino(ipVecino);
         
         // Borramos todos los destinos que eran alcanzables a través de este vecino.
-        // TODO: Implementar este método.
         TablaAlcanzabilidad.getTabla().removeAll(ipVecino);
         
         // Armamos el paquete que vamos a enviar.
