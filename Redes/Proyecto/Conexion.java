@@ -216,6 +216,12 @@ public class Conexion implements Runnable
         
         // Borramos todos los destinos que eran alcanzables a través de este vecino.
         alcanzabilidad.removeAll(ipVecino, false, ipVecino);
+        
+        synchronized(Router.hilosActivos)
+        {
+            Router.hilosActivos.remove(ipVecino);
+            Router.memoriaCompartida.remove(ipVecino);
+        }
     }
     
     private void solicitarConexion() throws IOException
@@ -312,6 +318,12 @@ public class Conexion implements Runnable
             }
         }
         //s.setSoTimeout(0);
+        
+        synchronized(Router.hilosActivos)
+        {
+            Router.hilosActivos.remove(ipVecino);
+            Router.memoriaCompartida.remove(ipVecino);
+        }
     }
     
     private void procesarSolicitudDeDesconexion() throws IOException
@@ -349,6 +361,12 @@ public class Conexion implements Runnable
         // Borramos todos los destinos que eran alcanzables a través de este vecino.
         // TODO: Implementar este método.
         TablaAlcanzabilidad.getTabla().removeAll(ipVecino, false, ipVecino);
+        
+        synchronized(Router.hilosActivos)
+        {
+            Router.hilosActivos.remove(ipVecino);
+            Router.memoriaCompartida.remove(ipVecino);
+        }
     }
     
     private void procesarPaqueteDeAlcanzabilidad() throws IOException
